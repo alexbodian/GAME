@@ -43,7 +43,7 @@ app.layout = html.Div([
         figure = {
             'data' : [
                 go.Choropleth(
-                    colorscale = scl,
+                    # colorscale = scl,
                     autocolorscale = False,
                     locations = df['code'],
                     z = df['total exports'].astype(float),
@@ -54,11 +54,13 @@ app.layout = html.Div([
                             color='rgb(255,255,255)',
                             width=2
                         )),
-                    colorbar=dict(
-                        title="Millions USD")
+                    # colorbar=dict(
+                    #     title="Millions USD")
                 )],
             'layout': go.Layout(
                 title = '2011 US Agriculture Exports by State<br>(Hover for breakdown)',
+                width = 800,
+                height = 800,
                 geo = dict(
                     scope = 'usa',
                     projection = dict (type= 'albers usa'),
@@ -76,7 +78,6 @@ app.layout = html.Div([
         }
     )
 ])
-
 
 
 
