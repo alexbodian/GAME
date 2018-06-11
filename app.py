@@ -16,27 +16,27 @@ import pandas as pd
 import plotly
 import plotly.graph_objs as go
 from collections import deque
-
 mapbox_access_token = "pk.eyJ1IjoiamFja3AiLCJhIjoidGpzN0lXVSJ9.7YK6eRwUNFwd3ODZff6JvA"
 
 df = pd.read_csv('laws.csv')
 
-df = (df[df['year'] == 2000])
-# print(df_2000)
+# df = (df[df['year'] == 2000])
+# # print(df_2000)
+# for col in df.columns:
+#     df[col] = df[col].astype(str)
 
-for col in df.columns:
-    df[col] = df[col].astype(str)
+year_options = []
+for year in df['year'].unique():
+    year_options.append({'label':str(year),'value':year})
+
+
 
 scl = [[0.0, 'rgb(242,240,247)'],[0.2, 'rgb(218,218,235)'],[0.4, 'rgb(188,189,220)'],\
             [0.6, 'rgb(158,154,200)'],[0.8, 'rgb(117,107,177)'],[1.0, 'rgb(84,39,143)']]
 
-# df['text'] = df['state'] + '<br>' +\
-#     'Beef '+df['beef']+' Dairy '+df['dairy']+'<br>'+\
-#     'Fruits '+df['total fruits']+' Veggies ' + df['total veggies']+'<br>'+\
-#     'Wheat '+df['wheat']+' Corn '+df['corn']
 
-df['text'] = df['state'] + '<br>' +\
-'age18longgunpossess ' + df['age18longgunpossess']+ ' age18longgunsale '+df['age18longgunsale'] 
+
+
 
 
 
@@ -46,191 +46,73 @@ app = dash.Dash()
 
 
 app.layout = html.Div([
-    dcc.Graph(
-        id = 'graph',
-        figure = {
-            'data' : [
-                go.Choropleth(
-                    # colorscale = scl,
-                    autocolorscale = False,
-                    locations = df['code'],
-                    z = df['lawtotal'].astype(float),
-                    locationmode='USA-states',
-                    text=df['text'],
-                    marker=dict(
-                        line=dict(
-                            color='rgb(255,255,255)',
-                            width=2
-                        )),
-                    # colorbar=dict(
-                    #     title="Millions USD")
-                )],
-            'layout': go.Layout(
-                title = '2000 US Firearms Provisions by State<br>(Hover for breakdown)',
-                width = 800,
-                height = 800,
-                geo = dict(
-                    scope = 'usa',
-                    projection = dict (type= 'albers usa'),
-                    showlakes = True,
-                    lakecolor = 'rgb(255,255,255)',
-                )
+    dcc.Graph(id='graph-with-slider'),
+    dcc.Dropdown(id='year-picker', options=year_options,value=df['year'].min())
 
+])
 
+@app.callback(Output('graph-with-slider', 'figure'),
+             [Input('year-picker','value')])
+def update_figure(selected_year):
+    
+    # filtered_df becomes a subset of the main df and contains all the
+    # data but only for the selected year
 
+    
+    filtered_df = df[df['year'] == selected_year]
+
+    # treat the filtered_df like the df in the original version since
+    # it has the relevant data for the year and should produce the correct
+    # graph
+    #  df -> filtered_df
+
+    for col in filtered_df.columns:
+        filtered_df[col] = filtered_df[col].astype(str)
+
+    filtered_df['text'] = filtered_df['state'] + '<br>' +\
+    'age18longgunpossess ' + filtered_df['age18longgunpossess']+ ' age18longgunsale '+ filtered_df['age18longgunsale'] 
+
+    
+    return {
+        'data' : [
+            go.Choropleth(
+                # colorscale = scl,
+                autocolorscale = False,
+                locations =  filtered_df['code'],
+                z =  filtered_df['lawtotal'].astype(float),
+                locationmode='USA-states',
+                text= filtered_df['text'],
+                marker=dict(
+                    line=dict(
+                        color='rgb(255,255,255)',
+                        width=2
+                    )),
+                # colorbar=dict(
+                #     title="Millions USD")
+            )],
+        'layout': go.Layout(
+            title = 'US Firearms Provisions by State<br>(Hover for breakdown)',
+            width = 800,
+            height = 800,
+            geo = dict(
+                scope = 'usa',
+                projection = dict (type= 'albers usa'),
+                showlakes = True,
+                lakecolor = 'rgb(255,255,255)',
             )
+
+
+
+        )
 
 
 
 
         }
-    )
-])
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# app.layout = html.Div(children=[
-#
-#
-#
-#     html.Div(
-#
-#         children=dcc.Graph(
-#             id='graph',
-#             figure={
-#                 'data': [{
-#                     'lat': 30, 'lon': 30, 'type': 'choropleth', 'locationmode': 'USA-states',
-#                 }],
-#                 'layout': {
-#                     'geo': {
-#                         'scope': (
-#                             'usa'
-#                         )
-#                     },
-#                     'margin': {
-#                         'l': 0, 'r': 0, 'b': 0, 't': 0
-#                     },
-#                 }
-#             }
-#         )
-#     )
-# ])
-
-# import plotly.plotly as py
-# import pandas as pd
-#
-# df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/2011_us_ag_exports.csv')
-#
-# for col in df.columns:
-#     df[col] = df[col].astype(str)
-#
-# scl = [[0.0, 'rgb(242,240,247)'], [0.2, 'rgb(218,218,235)'], [0.4, 'rgb(188,189,220)'], \
-#        [0.6, 'rgb(158,154,200)'], [0.8, 'rgb(117,107,177)'], [1.0, 'rgb(84,39,143)']]
-#
-# df['text'] = df['state'] + '<br>' + \
-#              'Beef ' + df['beef'] + ' Dairy ' + df['dairy'] + '<br>' + \
-#              'Fruits ' + df['total fruits'] + ' Veggies ' + df['total veggies'] + '<br>' + \
-#              'Wheat ' + df['wheat'] + ' Corn ' + df['corn']
-#
-# data = [dict(
-#     type='choropleth',
-#     colorscale=scl,
-#     autocolorscale=False,
-#     locations=df['code'],
-#     z=df['total exports'].astype(float),
-#     locationmode='USA-states',
-#     text=df['text'],
-#     marker=dict(
-#         line=dict(
-#             color='rgb(255,255,255)',
-#             width=2
-#         )),
-#     colorbar=dict(
-#         title="Millions USD")
-# )]
-#
-# layout = dict(
-#     title='2011 US Agriculture Exports by State<br>(Hover for breakdown)',
-#     geo=dict(
-#         scope='usa',
-#         projection=dict(type='albers usa'),
-#         showlakes=True,
-#         lakecolor='rgb(255, 255, 255)'),
-# )
-#
-# fig = dict(data=data, layout=layout)
-# py.iplot(fig, filename='d3-cloropleth-map')
-
-
-
-#     html.Div(
-
-#         children=dcc.Graph(
-#             id='graph',
-#             figure={
-#                 'data': [{
-#                     'lat': 30, 'lon': 30, 'type': 'choropleth', 'locationmode': 'USA-states',
-#                 }],
-#                 'layout': {
-#                     'mapbox': {
-#                         'accesstoken': (
-#                             'pk.eyJ1IjoiY2hyaWRkeXAiLCJhIjoiY2ozcGI1MTZ3M' +
-#                             'DBpcTJ3cXR4b3owdDQwaCJ9.8jpMunbKjdq1anXwU5gxIw'
-#                         )
-#                     },
-#                     'margin': {
-#                         'l': 0, 'r': 0, 'b': 0, 't': 0
-#                     },
-#                 }
-#             }
-#         )
-#     )
-# ])
-
-
-
-
-
-		# dcc.Graph(
-		# 	id = 'county-choropleth',
-		# 	figure = dict(
-		# 		data=dict(
-		# 			lat = df_lat_lon['Latitude '],
-		# 			lon = df_lat_lon['Longitude'],
-		# 			text = df_lat_lon['Hover'],
-		# 			type = 'scattermapbox'
-		# 		),
-		# 		layout = dict(
-		# 			mapbox = dict(
-		# 				layers = [],
-		# 				accesstoken = mapbox_access_token,
-		# 				style = 'light',
-		# 				center=dict(
-		# 					lat=38.72490,
-		# 					lon=-95.61446,
-		# 				),
-		# 				pitch=0,
-		# 				zoom=2.5
-		# 			)
-		# 		)
-		# 	)
-		# )
 
 
 
