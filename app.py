@@ -25,10 +25,18 @@ df = pd.read_csv('laws.csv')
 # for col in df.columns:
 #     df[col] = df[col].astype(str)
 
+
+# marks. marks is a dict where the keys represent the numerical values
+#  and the values represent their labels.
+# keys must be a string
+
 year_options = []
+range_dict = {}
 for year in df['year'].unique():
     year_options.append({'label':str(year),'value':year})
+    range_dict[str(year)] = year
 
+# year_dict = 
 
 
 scl = [[0.0, 'rgb(246,239,247)'],[0.2, 'rgb(208,209,230)'],[0.4, 'rgb(166,189,219)'],\
@@ -49,8 +57,16 @@ app = dash.Dash()
 
 app.layout = html.Div([
     dcc.Graph(id='graph-with-slider'),
-    dcc.Dropdown(id='year-picker', options=year_options,value=df['year'].min())
+    # dcc.Dropdown(id='year-picker', options=year_options,value=df['year'].min())
 
+    dcc.Slider(
+    id='year-picker', 
+    min = df['year'].min(),
+    max = df['year'].max(),
+    marks = range_dict,
+    value = df['year'].min(),
+    )
+    
 ])
 
 @app.callback(Output('graph-with-slider', 'figure'),
