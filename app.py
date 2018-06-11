@@ -91,7 +91,7 @@ def update_figure(selected_year):
                 #     title="Millions USD")
             )],
         'layout': go.Layout(
-            title = 'US Firearms Provisions by State<br>(Hover for breakdown)',
+            title = 'US Firearms Provisions by State for ' + str(selected_year), 
             width = 800,
             height = 800,
             geo = dict(
