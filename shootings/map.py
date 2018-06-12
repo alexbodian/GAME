@@ -23,24 +23,51 @@ from plotly.graph_objs import *
 plotly.tools.set_credentials_file(username='alex-bodian', api_key='kEQkmyYsbqOBY2UirpMq')
 mapbox_access_token = 'pk.eyJ1IjoiYWxleC1ib2RpYW4iLCJhIjoiY2pmaGVwZGRzNGQ4NDJ4bzFpeWNtM3N5YyJ9.kqDjoO1nF1YuiVynmcbcDw'
 
+
 # https://automating-gis-processes.github.io/2016/Lesson5-interactive-map-folium.html
 
-29.392825	-95.141972
+
+
+df = pd.read_csv('https://docs.google.com/spreadsheets/d/1b9o6uDO18sLxBqPwl_Gh9bnhW-ev_dABH83M5Vb5L8o/export?format=csv&gid=0')
+
+
+# print(df['case'])
+
+# list of lists
+# 0            1         2          3        4     5
+# case name , location, date, total victims, lat, lon
+
+desc = []
+lat = []
+lon = []
+
+
+for i in range(0, df.shape[0]):
+
+
+    text = df.loc[i, 'case'] + '\n'  \
+    + df.loc[i, 'location'] + '\n'  \
+    + df.loc[i, 'date'] + '\n'  \
+    + 'Casualties: ' + str(df.loc[i, 'total_victims'])
+
+    desc.append(text)
+
+    lat.append(df.loc[i, 'latitude'])
+    lon.append(df.loc[i, 'longitude'])
 
 
 
-# google images integration
-# https://stackoverflow.com/questions/40672983/can-i-use-mapbox-for-street-view-like-google-maps-street-view
+    
 
-# https://www.mapbox.com/api-documentation/?language=Python#maps
+
 
 
 data = Data([
     Scattermapbox(
 
 
-        lat=['29.392825'],
-        lon=['-95.141972'],
+        lat=lat,
+        lon=lon,
         mode='markers',
         marker=dict(
             size = 14,
@@ -48,7 +75,7 @@ data = Data([
 
             ),
 
-        text='file_list',
+        text= desc,
     ),
 
 ])
@@ -60,8 +87,8 @@ layout = Layout(
         accesstoken=mapbox_access_token,
         bearing=0,
         center=dict(
-        lat=29.392825,
-        lon=-95.141972
+        lat=39.5,
+        lon=-98.35
         ),
         pitch=0,
         zoom=3
