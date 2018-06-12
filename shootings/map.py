@@ -56,44 +56,85 @@ for i in range(0, df.shape[0]):
     lon.append(df.loc[i, 'longitude'])
 
 
+app = dash.Dash()
 
-    
+app.layout = html.Div([dcc.Graph(id='shooting_locations',
+                    figure = {'data': [
+                        go.Scattermapbox(
+                            lat=lat,
+                            lon=lon,
+                            mode='markers',
+                            marker = {
+                                'size' :14,
+                                },
+                            text=desc,
+                        )],
+                    'layout': go.Layout(
+                            title = 'US Mass Shooting Locations', 
+                            width = 1200,
+                            height = 800,
+                            autosize=True,
+                            hovermode='closest',
+                            mapbox=dict(
+                                accesstoken=mapbox_access_token,
+                                bearing=0,
+                                center=dict(
+                                    lat=39.5,
+                                    lon=-98.35
+                                            ),
+                                pitch=0,
+                                zoom=2
+                                ),
+                                )
+                    
+                    
+                    
+                    }
 
 
 
 
-data = Data([
-    Scattermapbox(
+)])
+
+if __name__ == '__main__':
+    app.run_server()
 
 
-        lat=lat,
-        lon=lon,
-        mode='markers',
-        marker=dict(
-            size = 14,
 
 
-            ),
 
-        text= desc,
-    ),
+# data = Data([
+#     Scattermapbox(
 
-])
 
-layout = Layout(
-    autosize=True,
-    hovermode='closest',
-    mapbox=dict(
-        accesstoken=mapbox_access_token,
-        bearing=0,
-        center=dict(
-        lat=39.5,
-        lon=-98.35
-        ),
-        pitch=0,
-        zoom=3
-    ),
-)
+#         lat=lat,
+#         lon=lon,
+#         mode='markers',
+#         marker=dict(
+#             size = 14,
 
-fig = dict(data=data, layout=layout)
-plotly.plotly.iplot(fig, filename='Scripting_Project', auto_open =True) #true makes it so that auto opens a web browser
+
+#             ),
+
+#         text= desc,
+#     ),
+
+# ])
+
+# layout = Layout(
+#     autosize=True,
+#     hovermode='closest',
+#     mapbox=dict(
+#         accesstoken=mapbox_access_token,
+#         bearing=0,
+#         center=dict(
+#         lat=39.5,
+#         lon=-98.35
+#         ),
+#         pitch=0,
+#         zoom=3
+#     ),
+# )
+
+# fig = dict(data=data, layout=layout)
+# plotly.plotly.iplot(fig, filename='Scripting_Project', auto_open =True) #true makes it so that auto opens a web browser
