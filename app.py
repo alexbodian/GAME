@@ -52,6 +52,7 @@ scl = [[0.0, 'rgb(246,239,247)'],[0.2, 'rgb(208,209,230)'],[0.4, 'rgb(166,189,21
 
 
 app = dash.Dash()
+app.config.supress_callback_exceptions=True
 # https://goo.gl/f75Ufn
 # chrolopleth info
 
