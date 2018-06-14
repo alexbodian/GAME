@@ -16,7 +16,69 @@ import pandas as pd
 import plotly
 import plotly.graph_objs as go
 from collections import deque
+import json
 mapbox_access_token = "pk.eyJ1IjoiamFja3AiLCJhIjoidGpzN0lXVSJ9.7YK6eRwUNFwd3ODZff6JvA"
+
+state_to_code = {
+    # # Other
+    # 'District of Columbia': 'DC',
+    
+    # States
+    'Alabama': 'AL',
+    'Montana': 'MT',
+    'Alaska': 'AK',
+    'Nebraska': 'NE',
+    'Arizona': 'AZ',
+    'Nevada': 'NV',
+    'Arkansas': 'AR',
+    'New Hampshire': 'NH',
+    'California': 'CA',
+    'New Jersey': 'NJ',
+    'Colorado': 'CO',
+    'New Mexico': 'NM',
+    'Connecticut': 'CT',
+    'New York': 'NY',
+    'Delaware': 'DE',
+    'North Carolina': 'NC',
+    'Florida': 'FL',
+    'North Dakota': 'ND',
+    'Georgia': 'GA',
+    'Ohio': 'OH',
+    'Hawaii': 'HI',
+    'Oklahoma': 'OK',
+    'Idaho': 'ID',
+    'Oregon': 'OR',
+    'Illinois': 'IL',
+    'Pennsylvania': 'PA',
+    'Indiana': 'IN',
+    'Rhode Island': 'RI',
+    'Iowa': 'IA',
+    'South Carolina': 'SC',
+    'Kansas': 'KS',
+    'South Dakota': 'SD',
+    'Kentucky': 'KY',
+    'Tennessee': 'TN',
+    'Louisiana': 'LA',
+    'Texas': 'TX',
+    'Maine': 'ME',
+    'Utah': 'UT',
+    'Maryland': 'MD',
+    'Vermont': 'VT',
+    'Massachusetts': 'MA',
+    'Virginia': 'VA',
+    'Michigan': 'MI',
+    'Washington': 'WA',
+    'Minnesota': 'MN',
+    'West Virginia': 'WV',
+    'Mississippi': 'MS',
+    'Wisconsin': 'WI',
+    'Missouri': 'MO',
+    'Wyoming': 'WY',
+}
+
+
+code_to_state = {v: k for k, v in state_to_code.items()}
+
 
 df = pd.read_csv('laws.csv')
 
@@ -36,7 +98,7 @@ for year in df['year'].unique():
     year_options.append({'label':str(year),'value':year})
     range_dict[str(year)] = year
 
-# year_dict = 
+# year_dict =
 
 
 scl = [[0.0, 'rgb(246,239,247)'],[0.2, 'rgb(208,209,230)'],[0.4, 'rgb(166,189,219)'],\
@@ -51,6 +113,7 @@ scl = [[0.0, 'rgb(246,239,247)'],[0.2, 'rgb(208,209,230)'],[0.4, 'rgb(166,189,21
 
 
 app = dash.Dash()
+app.config.supress_callback_exceptions=True
 # https://goo.gl/f75Ufn
 # chrolopleth info
 
@@ -60,23 +123,27 @@ app.layout = html.Div([
     # dcc.Dropdown(id='year-picker', options=year_options,value=df['year'].min())
 
     dcc.Slider(
-    id='year-picker', 
+    id='year-picker',
     min = df['year'].min(),
     max = df['year'].max(),
     marks = range_dict,
     value = df['year'].min(),
-    )
-    
-])
+    ),
+    html.Div(html.Pre(id='hover-data', style = {'paddingTop': 35}),
+    style={'width':'30%'}),
+
+
+
+],style={'width':'80%','float':'left'})
 
 @app.callback(Output('graph-with-slider', 'figure'),
              [Input('year-picker','value')])
 def update_figure(selected_year):
-    
+
     # filtered_df becomes a subset of the main df and contains all the
     # data but only for the selected year
 
-    
+
     filtered_df = df[df['year'] == selected_year]
 
     # treat the filtered_df like the df in the original version since
@@ -88,9 +155,9 @@ def update_figure(selected_year):
         filtered_df[col] = filtered_df[col].astype(str)
 
     filtered_df['text'] = filtered_df['state'] + '<br>' +\
-    'age18longgunpossess ' + filtered_df['age18longgunpossess']+ ' age18longgunsale '+ filtered_df['age18longgunsale'] 
+    'age18longgunpossess ' + filtered_df['age18longgunpossess']+ ' age18longgunsale '+ filtered_df['age18longgunsale']
 
-    
+
     return {
         'data' : [
             go.Choropleth(
@@ -109,7 +176,7 @@ def update_figure(selected_year):
                 #     title="Millions USD")
             )],
         'layout': go.Layout(
-            title = 'US Firearms Provisions by State for ' + str(selected_year), 
+            title = 'US Firearms Provisions by State for ' + str(selected_year),
             width = 800,
             height = 800,
             geo = dict(
@@ -129,7 +196,13 @@ def update_figure(selected_year):
         }
 
 
-
+@app.callback(Output('hover-data','children'),
+                [Input('graph-with-slider', 'hoverData')] #hoverdata is in every graph
+)
+def callback_image(hoverData):
+    state = hoverData['points'][0]['location']
+    # return json.dumps(hoverData,indent=2)
+    return code_to_state[state]
 
 
 
