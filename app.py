@@ -16,6 +16,7 @@ import pandas as pd
 import plotly
 import plotly.graph_objs as go
 from collections import deque
+import json
 mapbox_access_token = "pk.eyJ1IjoiamFja3AiLCJhIjoidGpzN0lXVSJ9.7YK6eRwUNFwd3ODZff6JvA"
 
 df = pd.read_csv('laws.csv')
@@ -36,7 +37,7 @@ for year in df['year'].unique():
     year_options.append({'label':str(year),'value':year})
     range_dict[str(year)] = year
 
-# year_dict = 
+# year_dict =
 
 
 scl = [[0.0, 'rgb(246,239,247)'],[0.2, 'rgb(208,209,230)'],[0.4, 'rgb(166,189,219)'],\
@@ -60,23 +61,27 @@ app.layout = html.Div([
     # dcc.Dropdown(id='year-picker', options=year_options,value=df['year'].min())
 
     dcc.Slider(
-    id='year-picker', 
+    id='year-picker',
     min = df['year'].min(),
     max = df['year'].max(),
     marks = range_dict,
     value = df['year'].min(),
-    )
-    
-])
+    ),
+    html.Div(html.Pre(id='hover-data', style = {'paddingTop': 35}),
+    style={'width':'30%'}),
+
+
+
+],style={'width':'80%','float':'left'})
 
 @app.callback(Output('graph-with-slider', 'figure'),
              [Input('year-picker','value')])
 def update_figure(selected_year):
-    
+
     # filtered_df becomes a subset of the main df and contains all the
     # data but only for the selected year
 
-    
+
     filtered_df = df[df['year'] == selected_year]
 
     # treat the filtered_df like the df in the original version since
@@ -88,9 +93,9 @@ def update_figure(selected_year):
         filtered_df[col] = filtered_df[col].astype(str)
 
     filtered_df['text'] = filtered_df['state'] + '<br>' +\
-    'age18longgunpossess ' + filtered_df['age18longgunpossess']+ ' age18longgunsale '+ filtered_df['age18longgunsale'] 
+    'age18longgunpossess ' + filtered_df['age18longgunpossess']+ ' age18longgunsale '+ filtered_df['age18longgunsale']
 
-    
+
     return {
         'data' : [
             go.Choropleth(
@@ -109,7 +114,7 @@ def update_figure(selected_year):
                 #     title="Millions USD")
             )],
         'layout': go.Layout(
-            title = 'US Firearms Provisions by State for ' + str(selected_year), 
+            title = 'US Firearms Provisions by State for ' + str(selected_year),
             width = 800,
             height = 800,
             geo = dict(
@@ -129,7 +134,11 @@ def update_figure(selected_year):
         }
 
 
-
+@app.callback(Output('hover-data','children'),
+                [Input('graph-with-slider', 'hoverData')] #hoverdata is in every graph
+)
+def callback_image(hoverData):
+    return json.dumps(hoverData,indent=2)
 
 
 
