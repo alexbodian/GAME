@@ -19,6 +19,9 @@ from collections import deque
 import json
 mapbox_access_token = "pk.eyJ1IjoiamFja3AiLCJhIjoidGpzN0lXVSJ9.7YK6eRwUNFwd3ODZff6JvA"
 
+# dealing with nan
+# https://youtu.be/-NR-ynQg0YM?t=1h5m58s
+
 state_to_code = {
     # # Other
     # 'District of Columbia': 'DC',
