@@ -76,9 +76,32 @@ state_to_code = {
     'Wyoming': 'WY',
 }
 
+monthes = ['January', 'February', 'March', 'April','May', 'June', 'July', 'August','September','October','November','December']
+
+
+db = pd.read_csv('nics-firearm-background-checks.csv')
+
+# year_month = []
+
+# month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07', \
+#                '-08','-09','-10','-11','-12' ]
+
+# year = '2004'
+# for i in month_list:
+#     curr = year + i
+#     year_month.append(curr)
+#     # print(curr)
+
+# dx = df[(df.month.isin(year_month)) & (df.state == 'Connecticut')]
+
+# # reverse df
+# dx = dx.iloc[::-1]
+
+
+
+
 
 code_to_state = {v: k for k, v in state_to_code.items()}
-
 
 df = pd.read_csv('laws.csv')
 
@@ -92,6 +115,7 @@ df = pd.read_csv('laws.csv')
 #  and the values represent their labels.
 # keys must be a string
 
+curr_year = ''
 year_options = []
 range_dict = {}
 for year in df['year'].unique():
@@ -113,28 +137,125 @@ scl = [[0.0, 'rgb(246,239,247)'],[0.2, 'rgb(208,209,230)'],[0.4, 'rgb(166,189,21
 
 
 app = dash.Dash()
-app.config.supress_callback_exceptions=True
+
 # https://goo.gl/f75Ufn
 # chrolopleth info
 
 
 app.layout = html.Div([
+
+    html.Div([    
     dcc.Graph(id='graph-with-slider'),
     # dcc.Dropdown(id='year-picker', options=year_options,value=df['year'].min())
-
     dcc.Slider(
     id='year-picker',
     min = df['year'].min(),
     max = df['year'].max(),
     marks = range_dict,
     value = df['year'].min(),
-    ),
+    ),],style={'width':'80%', 'height': '70%','float':'center', 'paddingLeft': 35, 'display': 'inline-block', 'paddingBottom':35}),
+
+
+    html.Div([dcc.Graph(id='background-scatter', 
+                    figure = {'data': [
+                        go.Scatter(
+                            x=monthes,
+                            y=[0,0,0,0,0,0,0,0,0,0,0,0],
+                            mode='lines+markers',
+                            marker = {
+                                'size' :12,
+                                'color': 'rgb(51,204,153)',
+                                'line':{'width':1},
+                            }
+                        )],
+                    'layout': go.Layout(title= 'Background checks',
+                                            yaxis = {'range': [0,db['totals'].min()]},
+                                            xaxis= {'title': 'Month'})}
+                    ),
+                    
+],style={'width': '80%', 'height':'80%', 'display':'inline-block'}),
+
+
     html.Div(html.Pre(id='hover-data', style = {'paddingTop': 35}),
     style={'width':'30%'}),
+            ])
+
+
+# @app.callback(Output('background-scatter', 'figure'),
+#              [Input('graph-with-slider','value')])
+
+@app.callback(Output('background-scatter','figure'),
+                [Input('graph-with-slider', 'hoverData')])
+def callback_graph(hoverData):
+    #     state = hoverData['points'][0]['location']
+    # year = hoverData['points'][0]['customdata']
+    # # return year
+    # return json.dumps(hoverData,indent=2)
+    # # return code_to_state[state] + ' ' + curr_year
+    # # return curr_year
+    month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07','-08','-09','-10','-11','-12' ]
+
+    state = hoverData['points'][0]['location']
+    state = code_to_state[state]
+    year = hoverData['points'][0]['customdata']
+    title = str(year) + ' ' + state + ' background checks'
+
+    year_month = []
+
+    for i in month_list:
+        curr = str(year) + i
+        year_month.append(curr)
+    
+    dx = db[(db.month.isin(year_month)) & (db.state == state)]
+
+# reverse df
+    dx = dx.iloc[::-1]
 
 
 
-],style={'width':'80%','float':'left'})
+    if year < 1999:
+        temp = [0,0,0,0,0,0,0,0,0,0,0,0]
+        figure = {'data': [
+                            go.Scatter(
+                                x=monthes,
+                                y=temp,
+                                mode='lines+markers',
+                                marker = {
+                                    'size' :12,
+                                    'color': 'rgb(51,204,153)',
+                                    'line':{'width':1},
+                                }
+                            )],
+                        'layout': go.Layout(title= title,
+                                            # yaxis = {'range': [0,(db['totals'].min())]},
+                                            xaxis= {'title': 'Month'})}
+
+    else:
+       figure = {'data': [
+                        go.Scatter(
+                            x=monthes,
+                            y=dx['totals'],
+                            mode='lines+markers',
+                            marker = {
+                                'size' :12,
+                                'color': 'rgb(51,204,153)',
+                                'line':{'width':1},
+                            }
+                        )],
+                    'layout': go.Layout(title= title,
+                                            # yaxis = {'range': [0,(db['totals'].min())]},
+                                            xaxis= {'title': 'Month'})}
+
+    
+    return figure
+
+
+
+
+
+
+
+
 
 @app.callback(Output('graph-with-slider', 'figure'),
              [Input('year-picker','value')])
@@ -143,7 +264,7 @@ def update_figure(selected_year):
     # filtered_df becomes a subset of the main df and contains all the
     # data but only for the selected year
 
-
+    
     filtered_df = df[df['year'] == selected_year]
 
     # treat the filtered_df like the df in the original version since
@@ -151,18 +272,21 @@ def update_figure(selected_year):
     # graph
     #  df -> filtered_df
 
+    year_list = []
     for col in filtered_df.columns:
         filtered_df[col] = filtered_df[col].astype(str)
+        year_list.append(selected_year)
 
     filtered_df['text'] = filtered_df['state'] + '<br>' +\
     'age18longgunpossess ' + filtered_df['age18longgunpossess']+ ' age18longgunsale '+ filtered_df['age18longgunsale']
-
+    
 
     return {
         'data' : [
             go.Choropleth(
                 colorscale = scl,
                 autocolorscale = False,
+                customdata = year_list,
                 locations =  filtered_df['code'],
                 z =  filtered_df['lawtotal'].astype(float),
                 locationmode='USA-states',
@@ -196,13 +320,16 @@ def update_figure(selected_year):
         }
 
 
-@app.callback(Output('hover-data','children'),
-                [Input('graph-with-slider', 'hoverData')] #hoverdata is in every graph
-)
-def callback_image(hoverData):
-    state = hoverData['points'][0]['location']
-    # return json.dumps(hoverData,indent=2)
-    return code_to_state[state]
+# @app.callback(Output('hover-data','children'),
+#                 [Input('graph-with-slider', 'hoverData')] #hoverdata is in every graph
+# )
+# def callback_image(hoverData):
+#     state = hoverData['points'][0]['location']
+#     year = hoverData['points'][0]['customdata']
+#     # return year
+#     return json.dumps(hoverData,indent=2)
+#     # return code_to_state[state] + ' ' + curr_year
+#     # return curr_year
 
 
 

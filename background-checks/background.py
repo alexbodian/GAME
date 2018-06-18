@@ -80,6 +80,7 @@ state_to_code = {
     'Wyoming': 'WY',
 }
 
+monthes = ['January', 'February', 'March', 'April','May', 'June', 'July', 'August','September','October','November','December']
 
 code_to_state = {v: k for k, v in state_to_code.items()}
 
@@ -88,8 +89,7 @@ df = pd.read_csv('nics-firearm-background-checks.csv')
 
 year_month = []
 
-month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07', \
-               '-08','-09','-10','-11','-12' ]
+month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07','-08','-09','-10','-11','-12' ]
 
 year = '2004'
 for i in month_list:
@@ -105,7 +105,38 @@ dx = dx.iloc[::-1]
 print(dx['month'])
 # for i in range(0,df.shape[0]):
 
-year_month [:] = []
+# year_month [:] = []
+test = list(range(1,13))
+
+app = dash.Dash()
+
+# creating data
+# np.random.seed(42)
+# random_x = np.random.randint(1,101,100)
+# random_y = np.random.randint(1,101,100)
+
+app.layout = html.Div([dcc.Graph(id='scatterplot', 
+                    figure = {'data': [
+                        go.Scatter(
+                            x=monthes,
+                            y=test,
+                            mode='markers',
+                            marker = {
+                                'size' :12,
+                                'color': 'rgb(51,204,153)',
+                                'line':{'width':1},
+                            }
+                        )],
+                    'layout': go.Layout(title='My Scatterplot',
+                                        xaxis= {'title':'Month'})}
+                    ),
+                    
+])
+
+
+if __name__ == '__main__':
+    app.run_server()
+
 
 
 #     print( str([df.loc[i, 'month ']]) + ' ' + str([df.loc[i, 'state']]) )
