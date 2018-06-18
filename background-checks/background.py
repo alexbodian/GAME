@@ -99,6 +99,9 @@ for i in month_list:
 
 dx = df[(df.month.isin(year_month)) & (df.state == 'Connecticut')]
 
+# reverse df
+dx = dx.iloc[::-1]
+
 print(dx['month'])
 # for i in range(0,df.shape[0]):
 
