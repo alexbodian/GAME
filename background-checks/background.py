@@ -86,4 +86,27 @@ code_to_state = {v: k for k, v in state_to_code.items()}
 
 df = pd.read_csv('nics-firearm-background-checks.csv')
 
-print(df)
+year_month = []
+
+month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07', \
+               '-08','-09','-10','-11','-12' ]
+
+year = '2004'
+for i in month_list:
+    curr = year + i
+    year_month.append(curr)
+    # print(curr)
+
+dx = df[(df.month.isin(year_month)) & (df.state == 'Connecticut')]
+
+print(dx['month'])
+# for i in range(0,df.shape[0]):
+
+year_month [:] = []
+
+
+#     print( str([df.loc[i, 'month ']]) + ' ' + str([df.loc[i, 'state']]) )
+    
+    
+
+
