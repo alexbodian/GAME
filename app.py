@@ -153,7 +153,7 @@ app.layout = html.Div([
     max = df['year'].max(),
     marks = range_dict,
     value = df['year'].min(),
-    ),],style={'width':'80%', 'height': '70%','float':'center', 'paddingLeft': 35, 'display': 'inline-block', 'paddingBottom':35}),
+    ),],style={'width':'50%', 'height': '70%','float':'center', 'paddingLeft': 35, 'display': 'inline-block', 'paddingBottom':35, 'paddingRight': 35}),
 
 
     html.Div([dcc.Graph(id='background-scatter', 
@@ -173,7 +173,7 @@ app.layout = html.Div([
                                             xaxis= {'title': 'Month'})}
                     ),
                     
-],style={'width': '80%', 'height':'80%', 'display':'inline-block'}),
+],style={'width': '40%', 'height':'90%', 'display':'inline-block'}),
 
 
     html.Div(html.Pre(id='hover-data', style = {'paddingTop': 35}),
