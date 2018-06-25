@@ -169,7 +169,7 @@ app.layout = html.Div([
                             }
                         )],
                     'layout': go.Layout(title= 'Background checks',
-                                            yaxis = {'range': [0,db['totals'].min()]},
+                                            yaxis = {'range': [0,600000]},
                                             xaxis= {'title': 'Month'})}
                     ),
                     
@@ -228,7 +228,9 @@ def callback_graph(hoverData):
                             )],
                         'layout': go.Layout(title= title,
                                             # yaxis = {'range': [0,(db['totals'].min())]},
-                                            xaxis= {'title': 'Month'})}
+                                            xaxis= {'title': 'Month'},
+                                            yaxis = {'range': [0,600000]}
+                                            )}
 
     else:
        figure = {'data': [
@@ -244,7 +246,9 @@ def callback_graph(hoverData):
                         )],
                     'layout': go.Layout(title= title,
                                             # yaxis = {'range': [0,(db['totals'].min())]},
-                                            xaxis= {'title': 'Month'})}
+                                            xaxis= {'title': 'Month'},
+                                            yaxis = {'range': [0,600000]}
+                                            )}
 
     
     return figure
