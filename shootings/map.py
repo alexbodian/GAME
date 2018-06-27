@@ -28,10 +28,10 @@ mapbox_access_token = 'pk.eyJ1IjoiYWxleC1ib2RpYW4iLCJhIjoiY2pmaGVwZGRzNGQ4NDJ4bz
 
 
 
-df = pd.read_csv('https://docs.google.com/spreadsheets/d/1b9o6uDO18sLxBqPwl_Gh9bnhW-ev_dABH83M5Vb5L8o/export?format=csv&gid=0')
+df_shooting = pd.read_csv('https://docs.google.com/spreadsheets/d/1b9o6uDO18sLxBqPwl_Gh9bnhW-ev_dABH83M5Vb5L8o/export?format=csv&gid=0')
 
 
-# print(df['case'])
+# print(df_shooting['case'])
 
 # list of lists
 # 0            1         2          3        4     5
@@ -43,23 +43,23 @@ lon = []
 year = []
 
 
-for i in range(0, df.shape[0]):
+for i in range(0, df_shooting.shape[0]):
 
 
-    text = df.loc[i, 'case'] + '\n'  \
-    + df.loc[i, 'location'] + '\n'  \
-    + df.loc[i, 'date'] + '\n'  \
-    + 'Casualties: ' + str(df.loc[i, 'total_victims'])
+    text = df_shooting.loc[i, 'case'] + '\n'  \
+    + df_shooting.loc[i, 'location'] + '\n'  \
+    + df_shooting.loc[i, 'date'] + '\n'  \
+    + 'Casualties: ' + str(df_shooting.loc[i, 'total_victims'])
 
     desc.append(text)
 
-    lat.append(df.loc[i, 'latitude'])
-    lon.append(df.loc[i, 'longitude'])
-    year.append(df.loc[i,'year'])
+    lat.append(df_shooting.loc[i, 'latitude'])
+    lon.append(df_shooting.loc[i, 'longitude'])
+    year.append(df_shooting.loc[i,'year'])
 
 
 # print(year)
-uniq_years = df['year'].unique()
+uniq_years = df_shooting['year'].unique()
 uniq_years = uniq_years[::-1]
 # print(type(uniq_years))
 # uniq_years = uniq_years.iloc[::-1]
