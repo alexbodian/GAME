@@ -149,7 +149,7 @@ for i in range(0,dfKaggle.shape[0]):
         if(flagDuplicate==False):
             if(date[j]==dateKaggle[i]):
                 if(loc[j]==locKaggle[i]):
-                    if(totalVic[j]==totalVicKaggle[i]):
+                    #if(totalVic[j]==totalVicKaggle[i]):
                         flagDuplicate=True
     if(flagDuplicate==False):
         Text = dfKaggle.loc[i, 'Title'] + '\n' \
