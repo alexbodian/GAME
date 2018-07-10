@@ -19,11 +19,12 @@ from collections import deque
 from plotly.graph_objs import *
 import json
 mapbox_access_token = 'pk.eyJ1IjoiYWxleC1ib2RpYW4iLCJhIjoiY2pmaGVwZGRzNGQ4NDJ4bzFpeWNtM3N5YyJ9.kqDjoO1nF1YuiVynmcbcDw'
+import numpy as np
 
 state_to_code = {
     # # Other
     # 'District of Columbia': 'DC',
-    
+
     # States
     'Alabama': 'AL',
     'Montana': 'MT',
@@ -99,7 +100,7 @@ db = pd.read_csv('nics-firearm-background-checks.csv')
 # dx = dx.iloc[::-1]
 
 df_shooting = pd.read_csv('https://docs.google.com/spreadsheets/d/1b9o6uDO18sLxBqPwl_Gh9bnhW-ev_dABH83M5Vb5L8o/export?format=csv&gid=0')
-
+dfKaggle = pd.read_csv('Mass Shootings Dataset Ver 2.csv',encoding='latin1')
 
 # print(df_shooting['case'])
 
@@ -112,21 +113,57 @@ lat = []
 lon = []
 years = []
 
+loc =[]
+date=[]
+totalVic=[]
+
+locKaggle=[]
+dateKaggle=[]
+totalVicKaggle=[]
+latKaggle=[]
+lonKaggle=[]
 
 for i in range(0, df_shooting.shape[0]):
-
+    loc.append(df_shooting.loc[i, 'location'] + '\n')
+    date.append(df_shooting.loc[i, 'date'] + '\n')
+    totalVic.append(str(df_shooting.loc[i, 'total_victims']))
 
     text = df_shooting.loc[i, 'case'] + '\n'  \
-    + df_shooting.loc[i, 'location'] + '\n'  \
-    + df_shooting.loc[i, 'date'] + '\n'  \
-    + 'Casualties: ' + str(df_shooting.loc[i, 'total_victims'])
-
+    + loc[i]  \
+    + date[i]  \
+    + 'Casualties: ' + totalVic[i]
     desc.append(text)
 
     lat.append(df_shooting.loc[i, 'latitude'])
     lon.append(df_shooting.loc[i, 'longitude'])
     years.append(df_shooting.loc[i,'year'])
 
+for i in range(0, dfKaggle.shape[0]):
+    locKaggle.append("" if dfKaggle.loc[i, 'Location'] is np.nan else dfKaggle.loc[i, 'Location']  + '\n')
+    dateKaggle.append(dfKaggle.loc[i, 'Date'] + '\n')
+    totalVicKaggle.append(str(dfKaggle.loc[i, 'Total victims']))
+
+for i in range(0,dfKaggle.shape[0]):
+    flagDuplicate=False
+    for j in range(0,df_shooting.shape[0]):
+        if(flagDuplicate==False):
+            if(date[j]==dateKaggle[i]):
+                if(loc[j]==locKaggle[i]):
+                    if(totalVic[j]==totalVicKaggle[i]):
+                        flagDuplicate=True
+    if(flagDuplicate==False):
+        Text = dfKaggle.loc[i, 'Title'] + '\n' \
+        + locKaggle[i] \
+        + dateKaggle[i] \
+        + 'Casualties: ' + totalVicKaggle[i]
+        desc.append(Text)
+        lat.append(dfKaggle.loc[i, 'Latitude'])
+        lon.append(dfKaggle.loc[i, 'Longitude'])
+        #years.append(dfKaggle.loc[i,'year']) no such column so have to substring
+        TempDateKaggle=dfKaggle.loc[i, 'Date']
+        TempYearKaggle=TempDateKaggle[(len(TempDateKaggle)-4):]
+        TempNum = int(TempYearKaggle)
+        years.append(TempNum)
 
 # print(year)
 uniq_years = df_shooting['year'].unique()
@@ -185,7 +222,7 @@ app = dash.Dash()
 
 app.layout = html.Div([
 
-    html.Div([    
+    html.Div([
     dcc.Graph(id='graph-with-slider'),
     # dcc.Dropdown(id='year-picker', options=year_options,value=df['year'].min())
     dcc.Slider(
@@ -197,7 +234,7 @@ app.layout = html.Div([
     ),],style={'width':'50%', 'height': '70%','float':'center', 'paddingLeft': 35, 'display': 'inline-block', 'paddingBottom':35, 'paddingRight': 35}),
 
 
-    html.Div([dcc.Graph(id='background-scatter', 
+    html.Div([dcc.Graph(id='background-scatter',
                     figure = {'data': [
                         go.Scatter(
                             x=monthes,
@@ -213,10 +250,10 @@ app.layout = html.Div([
                                             yaxis = {'range': [0,600000]},
                                             xaxis= {'title': 'Month'})}
                     ),
-                    
+
 ],style={'width': '40%', 'height':'90%', 'display':'inline-block'}),
 
-    html.Div([dcc.Graph(id='background-scatter-lasso', 
+    html.Div([dcc.Graph(id='background-scatter-lasso',
                     figure = {'data': [
                         go.Scatter(
                             x=monthes,
@@ -232,11 +269,11 @@ app.layout = html.Div([
                                             yaxis = {'range': [0,600000]},
                                             xaxis= {'title': 'Month'})}
                     ),
-                    
+
 ],style={'width': '80%', 'height':'90%', 'display':'inline-block', 'paddingTop': '35'}),
 
     html.Div([
-    
+
     dcc.Graph(id='shooting_locations'),
 
     dcc.RangeSlider(
@@ -280,7 +317,7 @@ def callback_graph(hoverData):
     for i in month_list:
         curr = str(year) + i
         year_month.append(curr)
-    
+
     dx = db[(db.month.isin(year_month)) & (db.state == state)]
 
 # reverse df
@@ -325,7 +362,7 @@ def callback_graph(hoverData):
                                             yaxis = {'range': [0,600000]}
                                             )}
 
-    
+
     return figure
 
 
@@ -343,7 +380,7 @@ def update_figure(selected_year):
     # filtered_df becomes a subset of the main df and contains all the
     # data but only for the selected year
 
-    
+
     filtered_df = df[df['year'] == selected_year]
 
     # treat the filtered_df like the df in the original version since
@@ -358,7 +395,7 @@ def update_figure(selected_year):
 
     filtered_df['text'] = filtered_df['state'] + '<br>' +\
     'age18longgunpossess ' + filtered_df['age18longgunpossess']+ ' age18longgunsale '+ filtered_df['age18longgunsale']
-    
+
 
     return {
         'data' : [
@@ -442,7 +479,7 @@ def backgroundScatterLasso(selectedData):
     year = selectedData['points'][0]['customdata']
 
     traces = []
-    
+
     month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07','-08','-09','-10','-11','-12' ]
     year_month = []
 
@@ -466,7 +503,7 @@ def backgroundScatterLasso(selectedData):
             name=code_to_state[selectedData['points'][i]['location']]
         ))
 
-                
+
                 # go.Scatter(
                 #             x=monthes,
                 #             y=temp,
@@ -501,7 +538,7 @@ def backgroundScatterLasso(selectedData):
             ))
 
 
-    
+
     return {
         'data': traces,
         'layout': go.Layout(
@@ -510,7 +547,7 @@ def backgroundScatterLasso(selectedData):
             xaxis= {'title': 'Month'},
             yaxis = {'range': [0,600000]},
             hovermode='closet'
-            
+
             )
     }
 
@@ -532,10 +569,10 @@ def update_locations(selected_years):
 
     count = 0
 
-    
+
 
     for i in years:
-    
+
         if (i >= selected_years[0]) and (i <= selected_years[1]):
             desc_temp.append(desc[count])
             lat_temp.append(lat[count])
@@ -556,7 +593,7 @@ def update_locations(selected_years):
                 text=desc_temp,
             )],
         'layout': go.Layout(
-                title = 'US Mass Shooting Locations', 
+                title = 'US Mass Shooting Locations',
                 width = 1200,
                 height = 800,
                 autosize=True,
