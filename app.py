@@ -21,6 +21,19 @@ import json
 mapbox_access_token = 'pk.eyJ1IjoiYWxleC1ib2RpYW4iLCJhIjoiY2pmaGVwZGRzNGQ4NDJ4bzFpeWNtM3N5YyJ9.kqDjoO1nF1YuiVynmcbcDw'
 import numpy as np
 
+def generate_table(dataframe):
+    max_rows = 1000
+
+    return html.Table(
+        # Header
+        [html.Tr([html.Th(col) for col in dataframe.columns])] +
+
+        # Body
+        [html.Tr([
+            html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
+        ]) for i in range(min(len(dataframe), max_rows))]
+    )
+
 state_to_code = {
     # # Other
     # 'District of Columbia': 'DC',
@@ -182,6 +195,7 @@ code_to_state = {v: k for k, v in state_to_code.items()}
 
 
 df = pd.read_csv('laws.csv')
+law_codes = pd.read_excel('codebook.xlsx')
 
 # df = (df[df['year'] == 2000])
 # # print(df_2000)
@@ -211,6 +225,31 @@ scl = [[0.0, 'rgb(246,239,247)'],[0.2, 'rgb(208,209,230)'],[0.4, 'rgb(166,189,21
 #  [0.4, 'rgb(254,144,106)'],[0.5, 'rgb(244,116,97)'],[0.6, 'rgb(231,87,88)'],\
 #  [0.7, 'rgb(213,60,76)'],[0.8, 'rgb(192,34,59)'],[0.9, 'rgb(167,11,36)'],[1.0, 'rgb(139,0,0)']]
 
+test = df[(df['code'] == 'CT') & (df['year'] == 1991)]
+
+notthis = [0,1,2,136]
+count = 0
+laws_list = []
+for i in range(0,133):
+    laws_list.append(law_codes.iloc[i,3])
+laws_headers = test.columns.values.tolist()
+
+lawsInState = []
+
+for i in range(0,137):
+    if i not in notthis: 
+        if test.iloc[0,i] == 1:
+            lawsInState.append(laws_headers[i])
+sorted(lawsInState, key=str.lower)
+lawsInStateDFList = []
+
+for i in range(0, len(lawsInState)):
+    test1 = law_codes[(law_codes['Category Code.3'] == lawsInState[i])]
+    lawsInStateDFList.append(test1)
+
+
+lawsInStateDF = pd.concat(lawsInStateDFList)
+
 
 
 
@@ -234,24 +273,31 @@ app.layout = html.Div([
     ),],style={'width':'50%', 'height': '70%','float':'center', 'paddingLeft': 35, 'display': 'inline-block', 'paddingBottom':35, 'paddingRight': 35}),
 
 
-    html.Div([dcc.Graph(id='background-scatter',
-                    figure = {'data': [
-                        go.Scatter(
-                            x=monthes,
-                            y=[0,0,0,0,0,0,0,0,0,0,0,0],
-                            mode='lines+markers',
-                            marker = {
-                                'size' :12,
-                                'color': 'rgb(51,204,153)',
-                                'line':{'width':1},
-                            }
-                        )],
-                    'layout': go.Layout(title= 'Background checks',
-                                            yaxis = {'range': [0,600000]},
-                                            xaxis= {'title': 'Month'})}
-                    ),
+#     html.Div([dcc.Graph(id='background-scatter',
+#                     figure = {'data': [
+#                         go.Scatter(
+#                             x=monthes,
+#                             y=[0,0,0,0,0,0,0,0,0,0,0,0],
+#                             mode='lines+markers',
+#                             marker = {
+#                                 'size' :12,
+#                                 'color': 'rgb(51,204,153)',
+#                                 'line':{'width':1},
+#                             }
+#                         )],
+#                     'layout': go.Layout(title= 'Background checks',
+#                                             yaxis = {'range': [0,600000]},
+#                                             xaxis= {'title': 'Month'})}
+#                     ),
 
+# ],style={'width': '40%', 'height':'90%', 'display':'inline-block'}),
+
+ html.Div(children=[
+    html.H4(children='Laws Connecticut 1991'),
+    generate_table(lawsInStateDF)
 ],style={'width': '40%', 'height':'90%', 'display':'inline-block'}),
+
+
 
     html.Div([dcc.Graph(id='background-scatter-lasso',
                     figure = {'data': [
@@ -296,79 +342,89 @@ app.layout = html.Div([
 # @app.callback(Output('background-scatter', 'figure'),
 #              [Input('graph-with-slider','value')])
 
-@app.callback(Output('background-scatter','figure'),
-                [Input('graph-with-slider', 'hoverData')])
-def callback_graph(hoverData):
-    #     state = hoverData['points'][0]['location']
-    # year = hoverData['points'][0]['customdata']
-    # # return year
-    # return json.dumps(hoverData,indent=2)
-    # # return code_to_state[state] + ' ' + curr_year
-    # # return curr_year
-    month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07','-08','-09','-10','-11','-12' ]
+# @app.callback(Output('background-scatter','figure'),
+#                 [Input('graph-with-slider', 'hoverData')])
+# def callback_graph(hoverData):
+#     #     state = hoverData['points'][0]['location']
+#     # year = hoverData['points'][0]['customdata']
+#     # # return year
+#     # return json.dumps(hoverData,indent=2)
+#     # # return code_to_state[state] + ' ' + curr_year
+#     # # return curr_year
+#     month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07','-08','-09','-10','-11','-12' ]
 
-    state = hoverData['points'][0]['location']
-    state = code_to_state[state]
-    year = hoverData['points'][0]['customdata']
-    title = str(year) + ' ' + state + ' background checks'
+#     state = hoverData['points'][0]['location']
+#     state = code_to_state[state]
+#     year = hoverData['points'][0]['customdata']
+#     title = str(year) + ' ' + state + ' background checks'
 
-    year_month = []
+#     year_month = []
 
-    for i in month_list:
-        curr = str(year) + i
-        year_month.append(curr)
+#     for i in month_list:
+#         curr = str(year) + i
+#         year_month.append(curr)
 
-    dx = db[(db.month.isin(year_month)) & (db.state == state)]
+#     dx = db[(db.month.isin(year_month)) & (db.state == state)]
 
-# reverse df
-    dx = dx.iloc[::-1]
-
-
-
-    if year < 1999:
-        temp = [0,0,0,0,0,0,0,0,0,0,0,0]
-        figure = {'data': [
-                            go.Scatter(
-                                x=monthes,
-                                y=temp,
-                                mode='lines+markers',
-                                marker = {
-                                    'size' :12,
-                                    'color': 'rgb(51,204,153)',
-                                    'line':{'width':1},
-                                }
-                            )],
-                        'layout': go.Layout(title= title,
-                                            # yaxis = {'range': [0,(db['totals'].min())]},
-                                            xaxis= {'title': 'Month'},
-                                            yaxis = {'range': [0,600000]}
-                                            )}
-
-    else:
-       figure = {'data': [
-                        go.Scatter(
-                            x=monthes,
-                            y=dx['totals'],
-                            mode='lines+markers',
-                            marker = {
-                                'size' :12,
-                                'color': 'rgb(51,204,153)',
-                                'line':{'width':1},
-                            }
-                        )],
-                    'layout': go.Layout(title= title,
-                                            # yaxis = {'range': [0,(db['totals'].min())]},
-                                            xaxis= {'title': 'Month'},
-                                            yaxis = {'range': [0,600000]}
-                                            )}
-
-
-    return figure
+# # reverse df
+#     dx = dx.iloc[::-1]
 
 
 
+#     if year < 1999:
+#         temp = [0,0,0,0,0,0,0,0,0,0,0,0]
+#         figure = {'data': [
+#                             go.Scatter(
+#                                 x=monthes,
+#                                 y=temp,
+#                                 mode='lines+markers',
+#                                 marker = {
+#                                     'size' :12,
+#                                     'color': 'rgb(51,204,153)',
+#                                     'line':{'width':1},
+#                                 }
+#                             )],
+#                         'layout': go.Layout(title= title,
+#                                             # yaxis = {'range': [0,(db['totals'].min())]},
+#                                             xaxis= {'title': 'Month'},
+#                                             yaxis = {'range': [0,600000]}
+#                                             )}
+
+#     else:
+#        figure = {'data': [
+#                         go.Scatter(
+#                             x=monthes,
+#                             y=dx['totals'],
+#                             mode='lines+markers',
+#                             marker = {
+#                                 'size' :12,
+#                                 'color': 'rgb(51,204,153)',
+#                                 'line':{'width':1},
+#                             }
+#                         )],
+#                     'layout': go.Layout(title= title,
+#                                             # yaxis = {'range': [0,(db['totals'].min())]},
+#                                             xaxis= {'title': 'Month'},
+#                                             yaxis = {'range': [0,600000]}
+#                                             )}
 
 
+#     return figure
+
+
+
+
+
+# @app.callback(Output('laws-df','figure'),
+#                 [Input('graph-with-slider', 'hoverData')])
+# def callback_graph(hoverData):
+#     #     state = hoverData['points'][0]['location']
+#     # year = hoverData['points'][0]['customdata']
+#     # # return year
+#     # return json.dumps(hoverData,indent=2)
+#     # # return code_to_state[state] + ' ' + curr_year
+#     # # return curr_year
+    
 
 
 
@@ -613,6 +669,8 @@ def update_locations(selected_years):
 
 
 }
+
+
 
 
 if __name__ == '__main__':
