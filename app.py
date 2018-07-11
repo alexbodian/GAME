@@ -22,7 +22,7 @@ mapbox_access_token = 'pk.eyJ1IjoiYWxleC1ib2RpYW4iLCJhIjoiY2pmaGVwZGRzNGQ4NDJ4bz
 import numpy as np
 
 def generate_table(dataframe):
-    max_rows = 1000
+    max_rows = 40
 
     return html.Table(
         # Header
@@ -270,7 +270,7 @@ app.layout = html.Div([
     max = df['year'].max(),
     marks = range_dict,
     value = df['year'].min(),
-    ),],style={'width':'50%', 'height': '70%','float':'center', 'paddingLeft': 35, 'display': 'inline-block', 'paddingBottom':35, 'paddingRight': 35}),
+    ),],style={'width':'40%', 'height': '70%','float':'center', 'paddingLeft': 15, 'display': 'block', 'paddingBottom':35}),
 
 
 #     html.Div([dcc.Graph(id='background-scatter',
@@ -292,10 +292,10 @@ app.layout = html.Div([
 
 # ],style={'width': '40%', 'height':'90%', 'display':'inline-block'}),
 
- html.Div(children=[
+ html.Div(id= 'provisions',children=[
     html.H4(children='Laws Connecticut 1991'),
     generate_table(lawsInStateDF)
-],style={'width': '40%', 'height':'90%', 'display':'inline-block'}),
+],style={'height': '600px', 'width':'600px', 'display':'block', 'overflow-x': 'auto', 'overflow-y': 'scroll', 'border-style': 'solid', 'border-width': '1px'}),
 
 
 
@@ -415,7 +415,7 @@ app.layout = html.Div([
 
 
 
-# @app.callback(Output('laws-df','figure'),
+# @app.callback(Output('provisions','figure'),
 #                 [Input('graph-with-slider', 'hoverData')])
 # def callback_graph(hoverData):
 #     #     state = hoverData['points'][0]['location']
@@ -503,24 +503,64 @@ def update_figure(selected_year):
 #     # return code_to_state[state] + ' ' + curr_year
 #     # return curr_year
 
-@app.callback(Output('hover-data', 'children'),
-                [Input('graph-with-slider','selectedData')])
-def find_density(selectedData):
+@app.callback(Output('provisions', 'children'),
+                [Input('graph-with-slider','hoverData')])
+def find_density(hoverData):
+    
+    code = hoverData['points'][0]['location']
+    year = hoverData['points'][0]['customdata']
+    
+
+
+
+    test = df[(df['code'] == code) & (df['year'] == year)]
+
+    notthis = [0,1,2,136]
+    count = 0
+    laws_list = []
+    for i in range(0,133):
+        laws_list.append(law_codes.iloc[i,3])
+    laws_headers = test.columns.values.tolist()
+
+    lawsInState = []
+
+    for i in range(0,137):
+        if i not in notthis: 
+            if test.iloc[0,i] == 1:
+                lawsInState.append(laws_headers[i])
+    sorted(lawsInState, key=str.lower)
+    lawsInStateDFList = []
+
+    for i in range(0, len(lawsInState)):
+        test1 = law_codes[(law_codes['Category Code.3'] == lawsInState[i])]
+        lawsInStateDFList.append(test1)
+
+
+    lawsInStateDF = pd.concat(lawsInStateDFList)
+
+    return generate_table(lawsInStateDF)
+
+
+
+
+
+
+
     # calc density
     # pts = len(selectedData['points'])
     # rng_or_lp = selectedData
-    numOfStates = len(selectedData['points'])
-    print(selectedData['points'][0]['customdata'])
+    # numOfStates = len(selectedData['points'])
+    # print(selectedData['points'][0]['customdata'])
 
 
-    for i in range(0,numOfStates):
-        print(code_to_state[selectedData['points'][i]['location']])
+    # for i in range(0,numOfStates):
+    #     print(code_to_state[selectedData['points'][i]['location']])
 
-    # print(len(rng_or_lp['points'])    )
+    # # print(len(rng_or_lp['points'])    )
 
-    return json.dumps(selectedData,indent=2)
-    # print( selectedData['points'][0]['location'])
-    # return selectedData['points'][0]['location']
+    # return json.dumps(selectedData,indent=2)
+    # # print( selectedData['points'][0]['location'])
+    # # return selectedData['points'][0]['location']
 
 
 @app.callback(Output('background-scatter-lasso', 'figure'),
