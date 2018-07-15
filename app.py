@@ -152,8 +152,8 @@ for i in range(0, df_shooting.shape[0]):
     years.append(df_shooting.loc[i,'year'])
 
 for i in range(0, dfKaggle.shape[0]):
-    locKaggle.append("" if dfKaggle.loc[i, 'Location'] is np.nan else dfKaggle.loc[i, 'Location']  + '\n')
-    dateKaggle.append(dfKaggle.loc[i, 'Date'] + '\n')
+    locKaggle.append("" if dfKaggle.loc[i, 'Location'] is np.nan else dfKaggle.loc[i, 'Location'])
+    dateKaggle.append(dfKaggle.loc[i, 'Date'])
     totalVicKaggle.append(str(dfKaggle.loc[i, 'Total victims']))
 
 for i in range(0,dfKaggle.shape[0]):
@@ -192,8 +192,8 @@ for i in uniq_years:
 
 shooting_monthes = []
 
-    
-        
+
+
 
 code_to_state = {v: k for k, v in state_to_code.items()}
 
@@ -236,7 +236,7 @@ laws_headers = test.columns.values.tolist()
 lawsInState = []
 
 for i in range(0,137):
-    if i not in notthis: 
+    if i not in notthis:
         if test.iloc[0,i] == 1:
             lawsInState.append(laws_headers[i])
 sorted(lawsInState, key=str.lower)
@@ -327,7 +327,7 @@ app.layout = html.Div([
 
 
 
-    
+
 
 
 
@@ -400,10 +400,10 @@ def update_figure(selected_year):
 @app.callback(Output('provisions', 'children'),
                 [Input('graph-with-slider','hoverData')])
 def find_density(hoverData):
-    
+
     code = hoverData['points'][0]['location']
     year = hoverData['points'][0]['customdata']
-    
+
 
 
 
@@ -419,7 +419,7 @@ def find_density(hoverData):
     lawsInState = []
 
     for i in range(0,137):
-        if i not in notthis: 
+        if i not in notthis:
             if test.iloc[0,i] == 1:
                 lawsInState.append(laws_headers[i])
     sorted(lawsInState, key=str.lower)
@@ -477,50 +477,50 @@ def backgroundScatterLasso(selectedData):
     for i in range(0, len(years)):
         if years[i] == year:
             Date = date[i]
-            if Date[1] == '/': 
-                
-                if Date[0] == '1': 
+            if Date[1] == '/':
+
+                if Date[0] == '1':
                     monthVict[0] += int(totalVic[i])
                     monthDesc[0] += (desc[i] + '<br>')
 
-                if Date[0] == '2': 
+                if Date[0] == '2':
                     monthVict[1] += int(totalVic[i])
                     monthDesc[1] += (desc[i] + '<br>')
-                            
-                if Date[0] == '3': 
+
+                if Date[0] == '3':
                     monthVict[2] += int(totalVic[i])
                     monthDesc[2] += (desc[i] + '<br>')
-                        
-                if Date[0] == '4': 
+
+                if Date[0] == '4':
                     monthVict[3] += int(totalVic[i])
                     monthDesc[3] += (desc[i] + '<br>')
 
-                if Date[0] == '5': 
+                if Date[0] == '5':
                     monthVict[4] += int(totalVic[i])
                     monthDesc[4] += (desc[i] + '<br>')
-                            
-                if Date[0] == '6': 
+
+                if Date[0] == '6':
                     monthVict[5] += int(totalVic[i])
                     monthDesc[5] += (desc[i] + '<br>')
-                        
-                if Date[0] == '7': 
+
+                if Date[0] == '7':
                     monthVict[6] += int(totalVic[i])
                     monthDesc[6] += (desc[i] + '<br>')
 
-                if Date[0] == '8': 
+                if Date[0] == '8':
                     monthVict[6] += int(totalVic[i] )
                     monthDesc[6] += (desc[i] + '<br>')
-                            
-                if Date[0] == '9': 
+
+                if Date[0] == '9':
                     monthVict[8] += int(totalVic[i])
                     monthDesc[8] += (desc[i] + '<br>')
 
             else:
-                
+
                 if Date[1] == '0':
                     monthVict[9] += int(totalVic[i])
                     monthDesc[9] += (desc[i] + '<br>')
-                
+
                 if Date[1] == '1':
                     monthVict[10] += int(totalVic[i])
                     monthDesc[10] += (desc[i] + '<br>')
