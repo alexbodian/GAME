@@ -137,14 +137,14 @@ latKaggle=[]
 lonKaggle=[]
 
 for i in range(0, df_shooting.shape[0]):
-    loc.append(df_shooting.loc[i, 'location'] + '\n')
-    date.append(df_shooting.loc[i, 'date'] + '\n')
+    loc.append(df_shooting.loc[i, 'location'])
+    date.append(df_shooting.loc[i, 'date'])
     totalVic.append(str(df_shooting.loc[i, 'total_victims']))
 
     text = df_shooting.loc[i, 'case'] + '\n'  \
     + loc[i]  \
     + date[i]  \
-    + 'Casualties: ' + totalVic[i]
+    + ' Casualties: ' + totalVic[i]
     desc.append(text)
 
     lat.append(df_shooting.loc[i, 'latitude'])
@@ -168,13 +168,15 @@ for i in range(0,dfKaggle.shape[0]):
         Text = dfKaggle.loc[i, 'Title'] + '\n' \
         + locKaggle[i] \
         + dateKaggle[i] \
-        + 'Casualties: ' + totalVicKaggle[i]
+        + ' Casualties: ' + totalVicKaggle[i]
         desc.append(Text)
         lat.append(dfKaggle.loc[i, 'Latitude'])
         lon.append(dfKaggle.loc[i, 'Longitude'])
         #years.append(dfKaggle.loc[i,'year']) no such column so have to substring
         TempDateKaggle=dfKaggle.loc[i, 'Date']
         TempYearKaggle=TempDateKaggle[(len(TempDateKaggle)-4):]
+        date.append(TempDateKaggle)
+        totalVic.append(totalVicKaggle[i])
         TempNum = int(TempYearKaggle)
         years.append(TempNum)
 
@@ -188,19 +190,16 @@ for i in uniq_years:
     year_dict[str(i)] = i
 
 
+shooting_monthes = []
 
-
+    
+        
 
 code_to_state = {v: k for k, v in state_to_code.items()}
 
 
 df = pd.read_csv('laws.csv')
 law_codes = pd.read_excel('codebook.xlsx')
-
-# df = (df[df['year'] == 2000])
-# # print(df_2000)
-# for col in df.columns:
-#     df[col] = df[col].astype(str)
 
 
 # marks. marks is a dict where the keys represent the numerical values
@@ -270,27 +269,9 @@ app.layout = html.Div([
     max = df['year'].max(),
     marks = range_dict,
     value = df['year'].min(),
-    ),],style={'width':'40%', 'height': '70%','float':'center', 'paddingLeft': 15, 'display': 'block', 'paddingBottom':35}),
+    ),],style={'width':'60%', 'height': '70%','float':'center', 'paddingLeft': 15, 'display': 'block', 'paddingBottom':35}),
 
 
-#     html.Div([dcc.Graph(id='background-scatter',
-#                     figure = {'data': [
-#                         go.Scatter(
-#                             x=monthes,
-#                             y=[0,0,0,0,0,0,0,0,0,0,0,0],
-#                             mode='lines+markers',
-#                             marker = {
-#                                 'size' :12,
-#                                 'color': 'rgb(51,204,153)',
-#                                 'line':{'width':1},
-#                             }
-#                         )],
-#                     'layout': go.Layout(title= 'Background checks',
-#                                             yaxis = {'range': [0,600000]},
-#                                             xaxis= {'title': 'Month'})}
-#                     ),
-
-# ],style={'width': '40%', 'height':'90%', 'display':'inline-block'}),
 
  html.Div(id= 'provisions',children=[
     html.H4(children='Laws Connecticut 1991'),
@@ -331,7 +312,7 @@ app.layout = html.Div([
         value=[1982,2018]
     )
 
-    ],style={'width':'80%', 'paddingLeft': 35}),
+    ],style={'width':'80%', 'paddingLeft': 35, 'paddingBottom': 2}),
 
 
     html.Div(html.Pre(id='hover-data', style = {'paddingTop': 35}),
@@ -339,91 +320,13 @@ app.layout = html.Div([
             ])
 
 
-# @app.callback(Output('background-scatter', 'figure'),
-#              [Input('graph-with-slider','value')])
-
-# @app.callback(Output('background-scatter','figure'),
-#                 [Input('graph-with-slider', 'hoverData')])
-# def callback_graph(hoverData):
-#     #     state = hoverData['points'][0]['location']
-#     # year = hoverData['points'][0]['customdata']
-#     # # return year
-#     # return json.dumps(hoverData,indent=2)
-#     # # return code_to_state[state] + ' ' + curr_year
-#     # # return curr_year
-#     month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07','-08','-09','-10','-11','-12' ]
-
-#     state = hoverData['points'][0]['location']
-#     state = code_to_state[state]
-#     year = hoverData['points'][0]['customdata']
-#     title = str(year) + ' ' + state + ' background checks'
-
-#     year_month = []
-
-#     for i in month_list:
-#         curr = str(year) + i
-#         year_month.append(curr)
-
-#     dx = db[(db.month.isin(year_month)) & (db.state == state)]
-
-# # reverse df
-#     dx = dx.iloc[::-1]
-
-
-
-#     if year < 1999:
-#         temp = [0,0,0,0,0,0,0,0,0,0,0,0]
-#         figure = {'data': [
-#                             go.Scatter(
-#                                 x=monthes,
-#                                 y=temp,
-#                                 mode='lines+markers',
-#                                 marker = {
-#                                     'size' :12,
-#                                     'color': 'rgb(51,204,153)',
-#                                     'line':{'width':1},
-#                                 }
-#                             )],
-#                         'layout': go.Layout(title= title,
-#                                             # yaxis = {'range': [0,(db['totals'].min())]},
-#                                             xaxis= {'title': 'Month'},
-#                                             yaxis = {'range': [0,600000]}
-#                                             )}
-
-#     else:
-#        figure = {'data': [
-#                         go.Scatter(
-#                             x=monthes,
-#                             y=dx['totals'],
-#                             mode='lines+markers',
-#                             marker = {
-#                                 'size' :12,
-#                                 'color': 'rgb(51,204,153)',
-#                                 'line':{'width':1},
-#                             }
-#                         )],
-#                     'layout': go.Layout(title= title,
-#                                             # yaxis = {'range': [0,(db['totals'].min())]},
-#                                             xaxis= {'title': 'Month'},
-#                                             yaxis = {'range': [0,600000]}
-#                                             )}
-
-
-#     return figure
 
 
 
 
 
-# @app.callback(Output('provisions','figure'),
-#                 [Input('graph-with-slider', 'hoverData')])
-# def callback_graph(hoverData):
-#     #     state = hoverData['points'][0]['location']
-#     # year = hoverData['points'][0]['customdata']
-#     # # return year
-#     # return json.dumps(hoverData,indent=2)
-#     # # return code_to_state[state] + ' ' + curr_year
-#     # # return curr_year
+
+
     
 
 
@@ -492,16 +395,7 @@ def update_figure(selected_year):
         }
 
 
-# @app.callback(Output('hover-data','children'),
-#                 [Input('graph-with-slider', 'hoverData')] #hoverdata is in every graph
-# )
-# def callback_image(hoverData):
-#     state = hoverData['points'][0]['location']
-#     year = hoverData['points'][0]['customdata']
-#     # return year
-#     return json.dumps(hoverData,indent=2)
-#     # return code_to_state[state] + ' ' + curr_year
-#     # return curr_year
+
 
 @app.callback(Output('provisions', 'children'),
                 [Input('graph-with-slider','hoverData')])
@@ -574,6 +468,71 @@ def backgroundScatterLasso(selectedData):
     numOfStates = len(selectedData['points'])
     year = selectedData['points'][0]['customdata']
 
+    monthVict = [0,0,0,0,0,0,0,0,0,0,0,0]
+    monthDesc = []
+    for i in range(1, 13):
+        monthDesc.append('')
+
+
+    for i in range(0, len(years)):
+        if years[i] == year:
+            Date = date[i]
+            if Date[1] == '/': 
+                
+                if Date[0] == '1': 
+                    monthVict[0] += int(totalVic[i])
+                    monthDesc[0] += (desc[i] + '<br>')
+
+                if Date[0] == '2': 
+                    monthVict[1] += int(totalVic[i])
+                    monthDesc[1] += (desc[i] + '<br>')
+                            
+                if Date[0] == '3': 
+                    monthVict[2] += int(totalVic[i])
+                    monthDesc[2] += (desc[i] + '<br>')
+                        
+                if Date[0] == '4': 
+                    monthVict[3] += int(totalVic[i])
+                    monthDesc[3] += (desc[i] + '<br>')
+
+                if Date[0] == '5': 
+                    monthVict[4] += int(totalVic[i])
+                    monthDesc[4] += (desc[i] + '<br>')
+                            
+                if Date[0] == '6': 
+                    monthVict[5] += int(totalVic[i])
+                    monthDesc[5] += (desc[i] + '<br>')
+                        
+                if Date[0] == '7': 
+                    monthVict[6] += int(totalVic[i])
+                    monthDesc[6] += (desc[i] + '<br>')
+
+                if Date[0] == '8': 
+                    monthVict[6] += int(totalVic[i] )
+                    monthDesc[6] += (desc[i] + '<br>')
+                            
+                if Date[0] == '9': 
+                    monthVict[8] += int(totalVic[i])
+                    monthDesc[8] += (desc[i] + '<br>')
+
+            else:
+                
+                if Date[1] == '0':
+                    monthVict[9] += int(totalVic[i])
+                    monthDesc[9] += (desc[i] + '<br>')
+                
+                if Date[1] == '1':
+                    monthVict[10] += int(totalVic[i])
+                    monthDesc[10] += (desc[i] + '<br>')
+
+                if Date[1] == '2':
+                    monthVict[11] += int(totalVic[i])
+                    monthDesc[11] += (desc[i] + '<br>')
+
+
+
+
+
     traces = []
 
     month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07','-08','-09','-10','-11','-12' ]
@@ -583,16 +542,25 @@ def backgroundScatterLasso(selectedData):
         curr = str(year) + i
         year_month.append(curr)
 
-
+    traces.append(go.Scatter(
+        x=monthes,
+        y=monthVict,
+        text= monthDesc,
+        mode='markers',
+        opacity=0.7,
+        marker={'size': 15},
+        name= 'Shootings'
+        ))
 
 
     if year < 1999:
         for i in range(0,numOfStates):
+            Name = code_to_state[selectedData['points'][i]['location']]
             temp = [0,0,0,0,0,0,0,0,0,0,0,0]
             traces.append(go.Scatter(
             x=monthes,
             y=temp,
-            text=selectedData['points'][i]['text'],
+            text=' ' + Name,
             mode='lines+markers',
             opacity=0.7,
             marker={'size': 15},
@@ -600,33 +568,19 @@ def backgroundScatterLasso(selectedData):
         ))
 
 
-                # go.Scatter(
-                #             x=monthes,
-                #             y=temp,
-                #             mode='lines+markers',
-                #             marker = {
-                #                 'size' :12,
-                #                 'color': 'rgb(51,204,153)',
-                #                 'line':{'width':1},
-                #             }
-                #         )],
-                #     'layout': go.Layout(title= title,
-                #                         # yaxis = {'range': [0,(db['totals'].min())]},
-                #                         xaxis= {'title': 'Month'},
-                #                         yaxis = {'range': [0,600000]}
-                #                         )}
 
 
     else:
         for i in range(0,numOfStates):
             dx = db[(db.month.isin(year_month)) & (db.state == code_to_state[selectedData['points'][i]['location']])]
             dx = dx.iloc[::-1]
+            Name = code_to_state[selectedData['points'][i]['location']]
 
 
             traces.append(go.Scatter(
             x=monthes,
             y=dx['totals'],
-            text=selectedData['points'][i]['text'],
+            text= Name,
             mode='lines+markers',
             opacity=0.7,
             marker={'size': 15},
