@@ -21,6 +21,9 @@ import json
 mapbox_access_token = 'pk.eyJ1IjoiYWxleC1ib2RpYW4iLCJhIjoiY2pmaGVwZGRzNGQ4NDJ4bzFpeWNtM3N5YyJ9.kqDjoO1nF1YuiVynmcbcDw'
 import numpy as np
 
+
+
+
 def generate_table(dataframe):
     max_rows = 40
 
@@ -181,7 +184,10 @@ for i in range(0,dfKaggle.shape[0]):
         years.append(TempNum)
 
 # print(year)
-uniq_years = df_shooting['year'].unique()
+#uniq_years = years.unique()
+setyears=set(years)
+
+uniq_years = list(setyears)
 uniq_years = uniq_years[::-1]
 # print(type(uniq_years))
 # uniq_years = uniq_years.iloc[::-1]
@@ -256,27 +262,36 @@ app = dash.Dash()
 
 # https://goo.gl/f75Ufn
 # chrolopleth info
-
+# Append an externally hosted CSS stylesheet
+#my_css_url = "https://unpkg.com/normalize.css@5.0.0"
+#app.css.append_css({"external_url": my_css_url})
+app.css.append_css({'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'})
+# Append an externally hosted JS bundle
+my_js_url = 'https://unkpg.com/some-npm-package.js'
+app.scripts.append_script({"external_url": my_js_url})
 
 app.layout = html.Div([
 
     html.Div([
     dcc.Graph(id='graph-with-slider'),
     # dcc.Dropdown(id='year-picker', options=year_options,value=df['year'].min())
+    ],style={'width':'60%', 'height': '70%','float':'left', 'paddingLeft': 15, 'display': 'block', 'paddingBottom':35}),
+
+ html.Div(id= 'provisions',children=[
+    html.H4(children='Laws Connecticut 1991'),
+    generate_table(lawsInStateDF)
+],style={'height': '600px', 'width':'600px', 'display':'block', 'overflow-x': 'auto', 'overflow-y': 'scroll', 'border-style': 'solid', 'border-width': '1px', 'float':'left'}),
+
+    html.Div([
     dcc.Slider(
     id='year-picker',
     min = df['year'].min(),
     max = df['year'].max(),
     marks = range_dict,
     value = df['year'].min(),
-    ),],style={'width':'60%', 'height': '70%','float':'center', 'paddingLeft': 15, 'display': 'block', 'paddingBottom':35}),
+    ),],style={'width':'60%', 'height': '70%','float':'left', 'paddingLeft': 15, 'display': 'block', 'paddingBottom':35}),
 
 
-
- html.Div(id= 'provisions',children=[
-    html.H4(children='Laws Connecticut 1991'),
-    generate_table(lawsInStateDF)
-],style={'height': '600px', 'width':'600px', 'display':'block', 'overflow-x': 'auto', 'overflow-y': 'scroll', 'border-style': 'solid', 'border-width': '1px'}),
 
 
 
@@ -301,7 +316,7 @@ app.layout = html.Div([
 
     html.Div([
 
-    dcc.Graph(id='shooting_locations'),
+    dcc.Graph(id='shooting_locations',style={'paddingBottom':0}),
 
     dcc.RangeSlider(
         id='shooting_range',
@@ -312,7 +327,7 @@ app.layout = html.Div([
         value=[1982,2018]
     )
 
-    ],style={'width':'80%', 'paddingLeft': 35, 'paddingBottom': 2}),
+    ],style={'width':'80%', 'paddingLeft': 35, 'paddingBottom': 50}),
 
 
     html.Div(html.Pre(id='hover-data', style = {'paddingTop': 35}),
