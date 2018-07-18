@@ -203,6 +203,9 @@ shooting_monthes = []
 
 code_to_state = {v: k for k, v in state_to_code.items()}
 
+StateCodes = list(code_to_state.keys())
+
+
 
 df = pd.read_csv('laws.csv')
 law_codes = pd.read_excel('codebook.xlsx')
@@ -288,14 +291,14 @@ app.layout = html.Div([
     min = df['year'].min(),
     max = df['year'].max(),
     marks = range_dict,
-    value = df['year'].min(),
+    value = df['year'].max(),
     ),],style={'width':'60%', 'height': '70%','float':'left', 'paddingLeft': 15, 'display': 'block', 'paddingBottom':35}),
 
 
 
 
 
-    html.Div([dcc.Graph(id='background-scatter-lasso',
+    html.Div([dcc.Graph(id='background-scatter-lasso',animate='false', 
                     figure = {'data': [
                         go.Scatter(
                             x=monthes,
@@ -313,6 +316,27 @@ app.layout = html.Div([
                     ),
 
 ],style={'width': '80%', 'height':'90%', 'display':'inline-block', 'paddingTop': '35'}),
+
+    html.Div([dcc.Graph(id='mass-shooting-scatter',animate='false', 
+                    figure = {'data': [
+                        go.Scatter(
+                            x=monthes,
+                            y=[0,0,0,0,0,0,0,0,0,0,0,0],
+                            mode='lines+markers',
+                            marker = {
+                                'size' :12,
+                                'color': 'rgb(51,204,153)',
+                                'line':{'width':1},
+                            }
+                        )],
+                    'layout': go.Layout(title= 'Mass Shootings',
+                                            yaxis = {'range': [0,5000], 'title': 'Total Victims'},
+                                            xaxis= {'title': 'Month'})}
+                    ),
+
+],style={'width': '80%', 'height':'90%', 'display':'inline-block', 'paddingTop': '35'}),
+
+
 
     html.Div([
 
@@ -346,7 +370,7 @@ app.layout = html.Div([
 
 
 
-
+# State provisions choropleth
 @app.callback(Output('graph-with-slider', 'figure'),
              [Input('year-picker','value')])
 def update_figure(selected_year):
@@ -360,7 +384,7 @@ def update_figure(selected_year):
     # treat the filtered_df like the df in the original version since
     # it has the relevant data for the year and should produce the correct
     # graph
-    #  df -> filtered_df
+    #  df -> filtered_df=
 
     year_list = []
     for col in filtered_df.columns:
@@ -452,36 +476,133 @@ def find_density(hoverData):
 
 
 
+# mass-shooting scatter
+@app.callback(Output('mass-shooting-scatter', 'figure'),
+                [Input('year-picker','value')])
+def massShootingScatter(selected_year):
+
+    # location is the abbrieviation for the state
+
+
+    year = selected_year
+
+    monthVict = [0,0,0,0,0,0,0,0,0,0,0,0]
+    monthDesc = []
+    for i in range(1, 13):
+        monthDesc.append('')
+
+
+    for i in range(0, len(years)):
+        if years[i] == year:
+            Date = date[i]
+            if Date[1] == '/':
+
+                if Date[0] == '1':
+                    monthVict[0] += int(totalVic[i])
+                    monthDesc[0] += (desc[i] + '<br>')
+
+                if Date[0] == '2':
+                    monthVict[1] += int(totalVic[i])
+                    monthDesc[1] += (desc[i] + '<br>')
+
+                if Date[0] == '3':
+                    monthVict[2] += int(totalVic[i])
+                    monthDesc[2] += (desc[i] + '<br>')
+
+                if Date[0] == '4':
+                    monthVict[3] += int(totalVic[i])
+                    monthDesc[3] += (desc[i] + '<br>')
+
+                if Date[0] == '5':
+                    monthVict[4] += int(totalVic[i])
+                    monthDesc[4] += (desc[i] + '<br>')
+
+                if Date[0] == '6':
+                    monthVict[5] += int(totalVic[i])
+                    monthDesc[5] += (desc[i] + '<br>')
+
+                if Date[0] == '7':
+                    monthVict[6] += int(totalVic[i])
+                    monthDesc[6] += (desc[i] + '<br>')
+
+                if Date[0] == '8':
+                    monthVict[6] += int(totalVic[i] )
+                    monthDesc[6] += (desc[i] + '<br>')
+
+                if Date[0] == '9':
+                    monthVict[8] += int(totalVic[i])
+                    monthDesc[8] += (desc[i] + '<br>')
+
+            else:
+
+                if Date[1] == '0':
+                    monthVict[9] += int(totalVic[i])
+                    monthDesc[9] += (desc[i] + '<br>')
+
+                if Date[1] == '1':
+                    monthVict[10] += int(totalVic[i])
+                    monthDesc[10] += (desc[i] + '<br>')
+
+                if Date[1] == '2':
+                    monthVict[11] += int(totalVic[i])
+                    monthDesc[11] += (desc[i] + '<br>')
+
+    maxVict = max(monthVict)
+
+
+    traces = []
+
+    month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07','-08','-09','-10','-11','-12' ]
+    year_month = []
+
+    for i in month_list:
+        curr = str(year) + i
+        year_month.append(curr)
+
+    traces.append(go.Scatter(
+        x=monthes,
+        y=monthVict,
+        text= monthDesc,
+        mode='markers',
+        opacity=0.7,
+        marker={'size': 15},
+        name= 'Shootings',
+        yaxis='Victims of mass shootings'
+        ))
 
 
 
-    # calc density
-    # pts = len(selectedData['points'])
-    # rng_or_lp = selectedData
-    # numOfStates = len(selectedData['points'])
-    # print(selectedData['points'][0]['customdata'])
+    return {
+        'data': traces,
+        'layout': go.Layout(
+            
+            title= str(year) + ' Mass Shootings',
+            xaxis= {'title': 'Month'},
+            yaxis = dict(range= [0,maxVict + 1000],autorange= True, title='Total Victims') ,
+            hovermode='closet',
+            legend=dict(orientation="v")
+            
+            )
+    }
 
 
-    # for i in range(0,numOfStates):
-    #     print(code_to_state[selectedData['points'][i]['location']])
-
-    # # print(len(rng_or_lp['points'])    )
-
-    # return json.dumps(selectedData,indent=2)
-    # # print( selectedData['points'][0]['location'])
-    # # return selectedData['points'][0]['location']
 
 
+
+
+
+
+
+# background-check scatterplot
 @app.callback(Output('background-scatter-lasso', 'figure'),
-                [Input('graph-with-slider','selectedData')])
-def backgroundScatterLasso(selectedData):
-    # calc density
-    # pts = len(selectedData['points'])
-    # rng_or_lp = selectedData
+                [Input('year-picker','value')])
+def backgroundScatterLasso(selected_year):
+
+    # location is the abbrieviation for the state
 
 
-    numOfStates = len(selectedData['points'])
-    year = selectedData['points'][0]['customdata']
+    numOfStates = len(StateCodes)
+    year = selected_year
 
     monthVict = [0,0,0,0,0,0,0,0,0,0,0,0]
     monthDesc = []
@@ -547,7 +668,6 @@ def backgroundScatterLasso(selectedData):
 
 
 
-
     traces = []
 
     month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07','-08','-09','-10','-11','-12' ]
@@ -564,13 +684,14 @@ def backgroundScatterLasso(selectedData):
         mode='markers',
         opacity=0.7,
         marker={'size': 15},
-        name= 'Shootings'
+        name= 'Shootings',
+        yaxis='Victims of mass shootings'
         ))
 
 
     if year < 1999:
         for i in range(0,numOfStates):
-            Name = code_to_state[selectedData['points'][i]['location']]
+            Name = code_to_state[StateCodes[i]]
             temp = [0,0,0,0,0,0,0,0,0,0,0,0]
             traces.append(go.Scatter(
             x=monthes,
@@ -579,7 +700,8 @@ def backgroundScatterLasso(selectedData):
             mode='lines+markers',
             opacity=0.7,
             marker={'size': 15},
-            name=code_to_state[selectedData['points'][i]['location']]
+            name=Name,
+            yaxis='Total Background Checks'
         ))
 
 
@@ -587,9 +709,9 @@ def backgroundScatterLasso(selectedData):
 
     else:
         for i in range(0,numOfStates):
-            dx = db[(db.month.isin(year_month)) & (db.state == code_to_state[selectedData['points'][i]['location']])]
+            dx = db[(db.month.isin(year_month)) & (db.state == code_to_state[StateCodes[i]])]
             dx = dx.iloc[::-1]
-            Name = code_to_state[selectedData['points'][i]['location']]
+            Name = code_to_state[StateCodes[i]]
 
 
             traces.append(go.Scatter(
@@ -599,7 +721,8 @@ def backgroundScatterLasso(selectedData):
             mode='lines+markers',
             opacity=0.7,
             marker={'size': 15},
-            name=code_to_state[selectedData['points'][i]['location']]
+            name=Name,
+            yaxis='Total Background Checks'
             ))
 
 
@@ -607,12 +730,13 @@ def backgroundScatterLasso(selectedData):
     return {
         'data': traces,
         'layout': go.Layout(
+            
             title= str(year) + ' background checks',
-            # yaxis = {'range': [0,(db['totals'].min())]},
             xaxis= {'title': 'Month'},
-            yaxis = {'range': [0,600000]},
-            hovermode='closet'
-
+            yaxis = dict(range= [0,600000],autorange= True, title='Total Background Checks') ,
+            hovermode='closet',
+            legend=dict(orientation="v")
+            
             )
     }
 
