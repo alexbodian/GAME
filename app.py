@@ -277,7 +277,7 @@ app.scripts.append_script({"external_url": my_js_url})
 app.layout = html.Div([
 
     html.Div([
-    dcc.Graph(id='graph-with-slider'),dcc.Graph(id='background-check-choropleth'),
+    dcc.Graph(id='graph-with-slider'),dcc.Graph(id='background-check-choropleth'),dcc.Graph(id='shootings-state-choropleth'),
     # dcc.Dropdown(id='year-picker', options=year_options,value=df['year'].min())
     ],style={'width':'50%', 'height': '70%','float':'left', 'paddingLeft': 15, 'display': 'inlineblock', 'paddingBottom':35}),
 
@@ -362,6 +362,82 @@ app.layout = html.Div([
 
 
 
+
+# shootings in each state choropleth
+@app.callback(Output('shootings-state-choropleth', 'figure'),
+             [Input('year-picker','value')])
+def update_figure(selected_year):
+
+    # filtered_df becomes a subset of the main df and contains all the
+    # data but only for the selected year
+
+
+
+    # treat the filtered_df like the df in the original version since
+    # it has the relevant data for the year and should produce the correct
+    # graph
+    #  df -> filtered_df=
+    month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07','-08','-09','-10','-11','-12' ]
+    year_month = []
+    totalBackgroundChecks = []
+
+    # appending the year to the month
+    for i in month_list:
+        curr = str(year) + i
+        year_month.append(curr)
+
+    # setting each index in the backgroundchecks list to 0
+    for i in range(0,50):
+        totalBackgroundChecks.append(0)
+
+
+    if selected_year > 1998:
+        for i  in range(0, len(StateCodes)):
+            for j in range(0, len(month_list)):
+                currState = code_to_state[StateCodes[i]]
+                dx = db[(db['month'] == year_month[j]) & (db['state'] == currState)]
+                num =  int(dx['totals'])
+                totalBackgroundChecks[i] += num
+
+
+
+    trace = [
+
+        go.Choropleth(
+        colorscale = scl,
+                autocolorscale = False,
+                locations =  StateCodes,
+                z =  totalBackgroundChecks,
+                text = list(state_to_code.keys()),
+                locationmode='USA-states',
+                marker=dict(
+                    line=dict(
+                        color='rgb(255,255,255)',
+                        width=2
+                    )),
+                # colorbar=dict(
+                #     title="Millions USD")
+
+
+        )]
+
+
+
+
+    return {
+        'data': trace,
+        'layout': go.Layout(
+            title = 'US Background Checks ' + str(selected_year),
+            width = 400,
+            height = 400,
+            geo = dict(
+                scope = 'usa',
+                projection = dict (type= 'albers usa'),
+                showlakes = True,
+                lakecolor = 'rgb(255,255,255)',
+                    )
+                    )
+            }
 
 
 
