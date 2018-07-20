@@ -14,7 +14,7 @@ import numpy as np
 # print(df['Age'].nunique())
 
 # col names
-# print(df.columns) 
+# print(df.columns)
 
 # print(df.info())
 # print(df.describe())3
@@ -23,7 +23,7 @@ import numpy as np
 state_to_code = {
     # # Other
     # 'District of Columbia': 'DC',
-    
+
     # States
     'Alabama': 'AL',
     'Montana': 'MT',
@@ -93,14 +93,14 @@ df = pd.read_csv('laws.csv')
 
 
 df_2000 = (df[df['year'] == 2000])
-print(df_2000)
+print(df_2000['code'])
 # print(df_new.shape[0])
 
 
-    
-    
-    
-    
+
+
+
+
 
 # df.to_csv('laws.csv')
 
@@ -121,5 +121,3 @@ print(df_2000)
 # print(df_US[df_US['state'] == 'Florida'])
 # print(df_US.columns) #column names
 # print(df_US)
-
-

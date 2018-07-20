@@ -43,54 +43,54 @@ state_to_code = {
 
     # States
     'Alabama': 'AL',
-    'Montana': 'MT',
     'Alaska': 'AK',
-    'Nebraska': 'NE',
     'Arizona': 'AZ',
-    'Nevada': 'NV',
     'Arkansas': 'AR',
-    'New Hampshire': 'NH',
     'California': 'CA',
-    'New Jersey': 'NJ',
     'Colorado': 'CO',
-    'New Mexico': 'NM',
     'Connecticut': 'CT',
-    'New York': 'NY',
     'Delaware': 'DE',
-    'North Carolina': 'NC',
     'Florida': 'FL',
-    'North Dakota': 'ND',
     'Georgia': 'GA',
-    'Ohio': 'OH',
     'Hawaii': 'HI',
-    'Oklahoma': 'OK',
     'Idaho': 'ID',
-    'Oregon': 'OR',
     'Illinois': 'IL',
-    'Pennsylvania': 'PA',
     'Indiana': 'IN',
-    'Rhode Island': 'RI',
     'Iowa': 'IA',
-    'South Carolina': 'SC',
     'Kansas': 'KS',
-    'South Dakota': 'SD',
     'Kentucky': 'KY',
-    'Tennessee': 'TN',
     'Louisiana': 'LA',
-    'Texas': 'TX',
     'Maine': 'ME',
-    'Utah': 'UT',
     'Maryland': 'MD',
-    'Vermont': 'VT',
     'Massachusetts': 'MA',
-    'Virginia': 'VA',
     'Michigan': 'MI',
-    'Washington': 'WA',
     'Minnesota': 'MN',
-    'West Virginia': 'WV',
     'Mississippi': 'MS',
-    'Wisconsin': 'WI',
     'Missouri': 'MO',
+    'Montana': 'MT',
+    'Nebraska': 'NE',
+    'Nevada': 'NV',
+    'New Hampshire': 'NH',
+    'New Jersey': 'NJ',
+    'New Mexico': 'NM',
+    'New York': 'NY',
+    'North Carolina': 'NC',
+    'North Dakota': 'ND',
+    'Ohio': 'OH',
+    'Oklahoma': 'OK',
+    'Oregon': 'OR',
+    'Pennsylvania': 'PA',
+    'Rhode Island': 'RI',
+    'South Carolina': 'SC',
+    'South Dakota': 'SD',
+    'Tennessee': 'TN',
+    'Texas': 'TX',
+    'Utah': 'UT',
+    'Vermont': 'VT',
+    'Virginia': 'VA',
+    'Washington': 'WA',
+    'West Virginia': 'WV',
+    'Wisconsin': 'WI',
     'Wyoming': 'WY',
 }
 
@@ -207,6 +207,7 @@ StateCodes = list(code_to_state.keys())
 
 
 
+
 df = pd.read_csv('laws.csv')
 law_codes = pd.read_excel('codebook.xlsx')
 
@@ -276,14 +277,14 @@ app.scripts.append_script({"external_url": my_js_url})
 app.layout = html.Div([
 
     html.Div([
-    dcc.Graph(id='graph-with-slider'),
+    dcc.Graph(id='graph-with-slider'),dcc.Graph(id='background-check-choropleth'),
     # dcc.Dropdown(id='year-picker', options=year_options,value=df['year'].min())
-    ],style={'width':'60%', 'height': '70%','float':'left', 'paddingLeft': 15, 'display': 'block', 'paddingBottom':35}),
+    ],style={'width':'50%', 'height': '70%','float':'left', 'paddingLeft': 15, 'display': 'inlineblock', 'paddingBottom':35}),
 
- html.Div(id= 'provisions',children=[
-    html.H4(children='Laws Connecticut 1991'),
-    generate_table(lawsInStateDF)
-],style={'height': '600px', 'width':'600px', 'display':'block', 'overflow-x': 'auto', 'overflow-y': 'scroll', 'border-style': 'solid', 'border-width': '1px', 'float':'left'}),
+#  html.Div(id= 'provisions',children=[
+#     html.H4(children='Laws Connecticut 1991'),
+#     generate_table(lawsInStateDF)
+# ],style={'height': '100px', 'width':'100px', 'display':'block', 'overflow-x': 'auto', 'overflow-y': 'scroll', 'border-style': 'solid', 'border-width': '1px', 'float':'left'}),
 
     html.Div([
     dcc.Slider(
@@ -298,7 +299,7 @@ app.layout = html.Div([
 
 
 
-    html.Div([dcc.Graph(id='background-scatter-lasso',animate='false', 
+    html.Div([dcc.Graph(id='background-scatter-lasso',animate='false',
                     figure = {'data': [
                         go.Scatter(
                             x=monthes,
@@ -317,7 +318,7 @@ app.layout = html.Div([
 
 ],style={'width': '80%', 'height':'90%', 'display':'inline-block', 'paddingTop': '35'}),
 
-    html.Div([dcc.Graph(id='mass-shooting-scatter',animate='false', 
+    html.Div([dcc.Graph(id='mass-shooting-scatter',animate='false',
                     figure = {'data': [
                         go.Scatter(
                             x=monthes,
@@ -365,6 +366,82 @@ app.layout = html.Div([
 
 
 
+
+# State background checks choropleth
+@app.callback(Output('background-check-choropleth', 'figure'),
+             [Input('year-picker','value')])
+def update_figure(selected_year):
+
+    # filtered_df becomes a subset of the main df and contains all the
+    # data but only for the selected year
+
+
+
+    # treat the filtered_df like the df in the original version since
+    # it has the relevant data for the year and should produce the correct
+    # graph
+    #  df -> filtered_df=
+    month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07','-08','-09','-10','-11','-12' ]
+    year_month = []
+    totalBackgroundChecks = []
+
+    # appending the year to the month
+    for i in month_list:
+        curr = str(year) + i
+        year_month.append(curr)
+
+    # setting each index in the backgroundchecks list to 0
+    for i in range(0,50):
+        totalBackgroundChecks.append(0)
+
+
+    if selected_year > 1998:
+        for i  in range(0, len(StateCodes)):
+            for j in range(0, len(month_list)):
+                currState = code_to_state[StateCodes[i]]
+                dx = db[(db['month'] == year_month[j]) & (db['state'] == currState)]
+                num =  int(dx['totals'])
+                totalBackgroundChecks[i] += num
+
+
+
+    trace = [
+
+        go.Choropleth(
+        colorscale = scl,
+                autocolorscale = False,
+                locations =  StateCodes,
+                z =  totalBackgroundChecks,
+                text = list(state_to_code.keys()),
+                locationmode='USA-states',
+                marker=dict(
+                    line=dict(
+                        color='rgb(255,255,255)',
+                        width=2
+                    )),
+                # colorbar=dict(
+                #     title="Millions USD")
+
+
+        )]
+
+
+
+
+    return {
+        'data': trace,
+        'layout': go.Layout(
+            title = 'US Background Checks ' + str(selected_year),
+            width = 400,
+            height = 400,
+            geo = dict(
+                scope = 'usa',
+                projection = dict (type= 'albers usa'),
+                showlakes = True,
+                lakecolor = 'rgb(255,255,255)',
+                    )
+                    )
+            }
 
 
 
@@ -415,8 +492,8 @@ def update_figure(selected_year):
             )],
         'layout': go.Layout(
             title = 'US Firearms Provisions by State for ' + str(selected_year),
-            width = 800,
-            height = 800,
+            width = 400,
+            height = 400,
             geo = dict(
                 scope = 'usa',
                 projection = dict (type= 'albers usa'),
@@ -435,43 +512,43 @@ def update_figure(selected_year):
 
 
 
-
-@app.callback(Output('provisions', 'children'),
-                [Input('graph-with-slider','hoverData')])
-def find_density(hoverData):
-
-    code = hoverData['points'][0]['location']
-    year = hoverData['points'][0]['customdata']
-
-
-
-
-    test = df[(df['code'] == code) & (df['year'] == year)]
-
-    notthis = [0,1,2,136]
-    count = 0
-    laws_list = []
-    for i in range(0,133):
-        laws_list.append(law_codes.iloc[i,3])
-    laws_headers = test.columns.values.tolist()
-
-    lawsInState = []
-
-    for i in range(0,137):
-        if i not in notthis:
-            if test.iloc[0,i] == 1:
-                lawsInState.append(laws_headers[i])
-    sorted(lawsInState, key=str.lower)
-    lawsInStateDFList = []
-
-    for i in range(0, len(lawsInState)):
-        test1 = law_codes[(law_codes['Category Code.3'] == lawsInState[i])]
-        lawsInStateDFList.append(test1)
-
-
-    lawsInStateDF = pd.concat(lawsInStateDFList)
-
-    return generate_table(lawsInStateDF)
+#
+# @app.callback(Output('provisions', 'children'),
+#                 [Input('graph-with-slider','hoverData')])
+# def find_density(hoverData):
+#
+#     code = hoverData['points'][0]['location']
+#     year = hoverData['points'][0]['customdata']
+#
+#
+#
+#
+#     test = df[(df['code'] == code) & (df['year'] == year)]
+#
+#     notthis = [0,1,2,136]
+#     count = 0
+#     laws_list = []
+#     for i in range(0,133):
+#         laws_list.append(law_codes.iloc[i,3])
+#     laws_headers = test.columns.values.tolist()
+#
+#     lawsInState = []
+#
+#     for i in range(0,137):
+#         if i not in notthis:
+#             if test.iloc[0,i] == 1:
+#                 lawsInState.append(laws_headers[i])
+#     sorted(lawsInState, key=str.lower)
+#     lawsInStateDFList = []
+#
+#     for i in range(0, len(lawsInState)):
+#         test1 = law_codes[(law_codes['Category Code.3'] == lawsInState[i])]
+#         lawsInStateDFList.append(test1)
+#
+#
+#     lawsInStateDF = pd.concat(lawsInStateDFList)
+#
+#     return generate_table(lawsInStateDF)
 
 
 
@@ -575,13 +652,13 @@ def massShootingScatter(selected_year):
     return {
         'data': traces,
         'layout': go.Layout(
-            
+
             title= str(year) + ' Mass Shootings',
             xaxis= {'title': 'Month'},
             yaxis = dict(range= [0,maxVict + 1000],autorange= True, title='Total Victims') ,
             hovermode='closet',
             legend=dict(orientation="v")
-            
+
             )
     }
 
@@ -604,69 +681,69 @@ def backgroundScatterLasso(selected_year):
     numOfStates = len(StateCodes)
     year = selected_year
 
-    monthVict = [0,0,0,0,0,0,0,0,0,0,0,0]
-    monthDesc = []
-    for i in range(1, 13):
-        monthDesc.append('')
+    # monthVict = [0,0,0,0,0,0,0,0,0,0,0,0]
+    # monthDesc = []
+    # for i in range(1, 13):
+    #     monthDesc.append('')
+    #
+    #
+    # for i in range(0, len(years)):
+    #     if years[i] == year:
+    #         Date = date[i]
+    #         if Date[1] == '/':
+    #
+    #             if Date[0] == '1':
+    #                 monthVict[0] += int(totalVic[i])
+    #                 monthDesc[0] += (desc[i] + '<br>')
+    #
+    #             if Date[0] == '2':
+    #                 monthVict[1] += int(totalVic[i])
+    #                 monthDesc[1] += (desc[i] + '<br>')
+    #
+    #             if Date[0] == '3':
+    #                 monthVict[2] += int(totalVic[i])
+    #                 monthDesc[2] += (desc[i] + '<br>')
+    #
+    #             if Date[0] == '4':
+    #                 monthVict[3] += int(totalVic[i])
+    #                 monthDesc[3] += (desc[i] + '<br>')
+    #
+    #             if Date[0] == '5':
+    #                 monthVict[4] += int(totalVic[i])
+    #                 monthDesc[4] += (desc[i] + '<br>')
+    #
+    #             if Date[0] == '6':
+    #                 monthVict[5] += int(totalVic[i])
+    #                 monthDesc[5] += (desc[i] + '<br>')
+    #
+    #             if Date[0] == '7':
+    #                 monthVict[6] += int(totalVic[i])
+    #                 monthDesc[6] += (desc[i] + '<br>')
+    #
+    #             if Date[0] == '8':
+    #                 monthVict[6] += int(totalVic[i] )
+    #                 monthDesc[6] += (desc[i] + '<br>')
+    #
+    #             if Date[0] == '9':
+    #                 monthVict[8] += int(totalVic[i])
+    #                 monthDesc[8] += (desc[i] + '<br>')
+    #
+    #         else:
+    #
+    #             if Date[1] == '0':
+    #                 monthVict[9] += int(totalVic[i])
+    #                 monthDesc[9] += (desc[i] + '<br>')
+    #
+    #             if Date[1] == '1':
+    #                 monthVict[10] += int(totalVic[i])
+    #                 monthDesc[10] += (desc[i] + '<br>')
+    #
+    #             if Date[1] == '2':
+    #                 monthVict[11] += int(totalVic[i])
+    #                 monthDesc[11] += (desc[i] + '<br>')
+    #
 
-
-    for i in range(0, len(years)):
-        if years[i] == year:
-            Date = date[i]
-            if Date[1] == '/':
-
-                if Date[0] == '1':
-                    monthVict[0] += int(totalVic[i])
-                    monthDesc[0] += (desc[i] + '<br>')
-
-                if Date[0] == '2':
-                    monthVict[1] += int(totalVic[i])
-                    monthDesc[1] += (desc[i] + '<br>')
-
-                if Date[0] == '3':
-                    monthVict[2] += int(totalVic[i])
-                    monthDesc[2] += (desc[i] + '<br>')
-
-                if Date[0] == '4':
-                    monthVict[3] += int(totalVic[i])
-                    monthDesc[3] += (desc[i] + '<br>')
-
-                if Date[0] == '5':
-                    monthVict[4] += int(totalVic[i])
-                    monthDesc[4] += (desc[i] + '<br>')
-
-                if Date[0] == '6':
-                    monthVict[5] += int(totalVic[i])
-                    monthDesc[5] += (desc[i] + '<br>')
-
-                if Date[0] == '7':
-                    monthVict[6] += int(totalVic[i])
-                    monthDesc[6] += (desc[i] + '<br>')
-
-                if Date[0] == '8':
-                    monthVict[6] += int(totalVic[i] )
-                    monthDesc[6] += (desc[i] + '<br>')
-
-                if Date[0] == '9':
-                    monthVict[8] += int(totalVic[i])
-                    monthDesc[8] += (desc[i] + '<br>')
-
-            else:
-
-                if Date[1] == '0':
-                    monthVict[9] += int(totalVic[i])
-                    monthDesc[9] += (desc[i] + '<br>')
-
-                if Date[1] == '1':
-                    monthVict[10] += int(totalVic[i])
-                    monthDesc[10] += (desc[i] + '<br>')
-
-                if Date[1] == '2':
-                    monthVict[11] += int(totalVic[i])
-                    monthDesc[11] += (desc[i] + '<br>')
-
-
-
+    print(StateCodes)
 
     traces = []
 
@@ -677,16 +754,16 @@ def backgroundScatterLasso(selected_year):
         curr = str(year) + i
         year_month.append(curr)
 
-    traces.append(go.Scatter(
-        x=monthes,
-        y=monthVict,
-        text= monthDesc,
-        mode='markers',
-        opacity=0.7,
-        marker={'size': 15},
-        name= 'Shootings',
-        yaxis='Victims of mass shootings'
-        ))
+    # traces.append(go.Scatter(
+    #     x=monthes,
+    #     y=monthVict,
+    #     text= monthDesc,
+    #     mode='markers',
+    #     opacity=0.7,
+    #     marker={'size': 15},
+    #     name= 'Shootings',
+    #     yaxis='Victims of mass shootings'
+    #     ))
 
 
     if year < 1999:
@@ -730,13 +807,13 @@ def backgroundScatterLasso(selected_year):
     return {
         'data': traces,
         'layout': go.Layout(
-            
+
             title= str(year) + ' background checks',
             xaxis= {'title': 'Month'},
             yaxis = dict(range= [0,600000],autorange= True, title='Total Background Checks') ,
             hovermode='closet',
             legend=dict(orientation="v")
-            
+
             )
     }
 
