@@ -20,6 +20,10 @@ from plotly.graph_objs import *
 import json
 mapbox_access_token = 'pk.eyJ1IjoiYWxleC1ib2RpYW4iLCJhIjoiY2pmaGVwZGRzNGQ4NDJ4bzFpeWNtM3N5YyJ9.kqDjoO1nF1YuiVynmcbcDw'
 import numpy as np
+import os 
+from flask_caching import Cache
+
+
 
 
 
@@ -262,8 +266,15 @@ lawsInStateDF = pd.concat(lawsInStateDFList)
 
 
 
-app = dash.Dash()
+app = dash.Dash(__name__)
+cache = Cache(app.server, config={
+    # try 'filesystem' if you don't want to setup redis
+    'CACHE_TYPE': 'redis',
+    'CACHE_REDIS_URL': os.environ.get('REDIS_URL', '')
+})
+app.config.suppress_callback_exceptions = True
 
+timeout = 10
 # https://goo.gl/f75Ufn
 # chrolopleth info
 # Append an externally hosted CSS stylesheet
@@ -819,7 +830,7 @@ def backgroundScatterLasso(selected_year):
     #                 monthDesc[11] += (desc[i] + '<br>')
     #
 
-    print(StateCodes)
+    # print(StateCodes)
 
     traces = []
 
@@ -878,13 +889,13 @@ def backgroundScatterLasso(selected_year):
             yaxis='Total Background Checks'
             ))
 
-
+    
 
     return {
         'data': traces,
         'layout': go.Layout(
 
-            title= str(year) + ' background checks',
+            title= str(selected_year) + ' background checks',
             xaxis= {'title': 'Month'},
             yaxis = dict(range= [0,600000],autorange= True, title='Total Background Checks') ,
             hovermode='closet',
