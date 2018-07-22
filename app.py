@@ -148,10 +148,10 @@ for i in range(0, df_shooting.shape[0]):
     date.append(df_shooting.loc[i, 'date'])
     totalVic.append(str(df_shooting.loc[i, 'total_victims']))
 
-    text = df_shooting.loc[i, 'case'] + '\n'  \
-    + loc[i]  \
+    text = df_shooting.loc[i, 'case'] + '<br>'  \
+    + loc[i] + ' ' \
     + date[i]  \
-    + ' Casualties: ' + totalVic[i]
+    + ' Casualties: ' + totalVic[i] + '<br>'
     desc.append(text)
 
     lat.append(df_shooting.loc[i, 'latitude'])
@@ -172,10 +172,10 @@ for i in range(0,dfKaggle.shape[0]):
                     #if(totalVic[j]==totalVicKaggle[i]):
                         flagDuplicate=True
     if(flagDuplicate==False):
-        Text = dfKaggle.loc[i, 'Title'] + '\n' \
-        + locKaggle[i] \
+        Text = dfKaggle.loc[i, 'Title'] + '<br>' \
+        + locKaggle[i] + ' ' \
         + dateKaggle[i] \
-        + ' Casualties: ' + totalVicKaggle[i]
+        + ' Casualties: ' + totalVicKaggle[i] + '<br>'
         desc.append(Text)
         lat.append(dfKaggle.loc[i, 'Latitude'])
         lon.append(dfKaggle.loc[i, 'Longitude'])
@@ -186,6 +186,7 @@ for i in range(0,dfKaggle.shape[0]):
         totalVic.append(totalVicKaggle[i])
         TempNum = int(TempYearKaggle)
         years.append(TempNum)
+        loc.append(locKaggle[i])
 
 # print(year)
 #uniq_years = years.unique()
@@ -387,33 +388,34 @@ def update_figure(selected_year):
     # filtered_df becomes a subset of the main df and contains all the
     # data but only for the selected year
 
+    year = selected_year
 
 
-    # treat the filtered_df like the df in the original version since
-    # it has the relevant data for the year and should produce the correct
-    # graph
-    #  df -> filtered_df=
-    month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07','-08','-09','-10','-11','-12' ]
-    year_month = []
-    totalBackgroundChecks = []
 
-    # appending the year to the month
-    for i in month_list:
-        curr = str(year) + i
-        year_month.append(curr)
+    listOfStates = list(state_to_code.keys())
+    listOfCodes = list(code_to_state.keys())
 
-    # setting each index in the backgroundchecks list to 0
-    for i in range(0,50):
-        totalBackgroundChecks.append(0)
+    listOfShootings = []
+    numOfShootings = []
+
+    # init the list with blank strings
+    for i in range(0, 50):
+        formattedText = listOfStates[i] + '<br>'
+        listOfShootings.append(formattedText)
+        numOfShootings.append(0)
 
 
-    if selected_year > 1998:
-        for i  in range(0, len(StateCodes)):
-            for j in range(0, len(month_list)):
-                currState = code_to_state[StateCodes[i]]
-                dx = db[(db['month'] == year_month[j]) & (db['state'] == currState)]
-                num =  int(dx['totals'])
-                totalBackgroundChecks[i] += num
+
+
+    for i in range(0, len(years)):
+        if years[i] == year:
+
+            for j in range(0,50):
+                if (listOfStates[j] in loc[i]) or (listOfCodes[j] in loc[i]):
+                        listOfShootings[j] += desc[i] + '<br>'
+                        numOfShootings[j] += 1
+
+
 
 
 
@@ -422,17 +424,17 @@ def update_figure(selected_year):
         go.Choropleth(
         colorscale = scl,
                 autocolorscale = False,
-                locations =  StateCodes,
-                z =  totalBackgroundChecks,
-                text = list(state_to_code.keys()),
+                locations =  listOfCodes,
+                z =  numOfShootings,
+                text = listOfShootings,
                 locationmode='USA-states',
                 marker=dict(
                     line=dict(
                         color='rgb(255,255,255)',
                         width=2
                     )),
-                # colorbar=dict(
-                #     title="Millions USD")
+                colorbar=dict(
+                    title="Total Mass Shootings")
 
 
         )]
@@ -443,7 +445,7 @@ def update_figure(selected_year):
     return {
         'data': trace,
         'layout': go.Layout(
-            title = 'US Background Checks ' + str(selected_year),
+            title = 'US Mass Shootings ' + str(selected_year),
             width = 600,
             height = 600,
             geo = dict(
@@ -511,8 +513,8 @@ def update_figure(selected_year):
                         color='rgb(255,255,255)',
                         width=2
                     )),
-                # colorbar=dict(
-                #     title="Millions USD")
+                colorbar=dict(
+                    title="Total Background Checks")
 
 
         )]
@@ -579,8 +581,8 @@ def update_figure(selected_year):
                         color='rgb(255,255,255)',
                         width=2
                     )),
-                # colorbar=dict(
-                #     title="Millions USD")
+                colorbar=dict(
+                    title="Total Laws")
             )],
         'layout': go.Layout(
             title = 'US Firearms Provisions by State for ' + str(selected_year),
