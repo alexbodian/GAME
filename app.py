@@ -265,9 +265,10 @@ for i in range(0, len(lawsInState)):
 lawsInStateDF = pd.concat(lawsInStateDFList)
 
 
-server = app.server
+
 
 app = dash.Dash(__name__)
+
 # cache = Cache(app.server, config={
 #     # try 'filesystem' if you don't want to setup redis
 #     'CACHE_TYPE': 'redis',
