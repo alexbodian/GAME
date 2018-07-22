@@ -563,8 +563,9 @@ def update_figure(selected_year):
         filtered_df[col] = filtered_df[col].astype(str)
         year_list.append(selected_year)
 
-    filtered_df['text'] = filtered_df['state'] + '<br>' +\
-    'age18longgunpossess ' + filtered_df['age18longgunpossess']+ ' age18longgunsale '+ filtered_df['age18longgunsale']
+    filtered_df['text'] = filtered_df['state']
+    # + '<br>' +\
+    # 'age18longgunpossess ' + filtered_df['age18longgunpossess']+ ' age18longgunsale '+ filtered_df['age18longgunsale']
 
 
     return {
