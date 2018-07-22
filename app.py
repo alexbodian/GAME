@@ -299,12 +299,12 @@ app.layout = html.Div([
 
     html.Div([
         html.Div([
-        dcc.Graph(id='graph-with-slider')],style={'width':'30%', 'height': '70%','float':'left','margin': 0, 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':35, 'overflow': 'hidden'}),
+        dcc.Graph(id='graph-with-slider')],style={'width':'30%', 'height': '70%','float':'left','margin': 0, 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':15, 'overflow': 'hidden'}),
         html.Div([
-        dcc.Graph(id='background-check-choropleth')],style={'width':'30%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':35, 'overflow': 'hidden'}),
+        dcc.Graph(id='background-check-choropleth')],style={'width':'30%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':15, 'overflow': 'hidden'}),
         html.Div([
-        dcc.Graph(id='shootings-state-choropleth')],style={'width':'30%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':35, 'overflow': 'hidden'}),
-    ],style={'width':'100%', 'height': '70%','float':'left', 'paddingLeft': 15, 'display': 'inlineblock', 'paddingBottom':35}),
+        dcc.Graph(id='shootings-state-choropleth')],style={'width':'30%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':15, 'overflow': 'hidden'}),
+    ],style={'width':'100%', 'height': '70%','float':'left', 'paddingLeft': 15, 'display': 'inlineblock', 'paddingBottom':15}),
 html.Div([
     html.Details([
         html.Summary('List of Laws'),
