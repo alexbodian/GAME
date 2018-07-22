@@ -28,10 +28,13 @@ from flask_caching import Cache
 
 
 
-def generate_table(dataframe):
+def generate_table(dataframe,title):
     max_rows = 40
 
     return html.Table(
+        # Header
+        [html.Tr(html.H3(title))] +
+
         # Header
         [html.Tr([html.Th(col) for col in dataframe.columns])] +
 
@@ -39,7 +42,8 @@ def generate_table(dataframe):
         [html.Tr([
             html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
         ]) for i in range(min(len(dataframe), max_rows))]
-    )
+            )
+
 
 state_to_code = {
     # # Other
@@ -214,7 +218,11 @@ StateCodes = list(code_to_state.keys())
 
 
 df = pd.read_csv('laws.csv')
-law_codes = pd.read_excel('codebook.xlsx')
+temp_codes = pd.read_excel('codebook.xlsx')
+
+law_codes = temp_codes.loc[:,'Category Code':'Category Code.4']
+
+
 
 
 # marks. marks is a dict where the keys represent the numerical values
@@ -296,13 +304,14 @@ app.layout = html.Div([
         dcc.Graph(id='background-check-choropleth')],style={'width':'30%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':35, 'overflow': 'hidden'}),
         html.Div([
         dcc.Graph(id='shootings-state-choropleth')],style={'width':'30%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':35, 'overflow': 'hidden'}),
-    # dcc.Dropdown(id='year-picker', options=year_options,value=df['year'].min())
     ],style={'width':'100%', 'height': '70%','float':'left', 'paddingLeft': 15, 'display': 'inlineblock', 'paddingBottom':35}),
-
-#  html.Div(id= 'provisions',children=[
-#     html.H4(children='Laws Connecticut 1991'),
-#     generate_table(lawsInStateDF)
-# ],style={'height': '100px', 'width':'100px', 'display':'block', 'overflow-x': 'auto', 'overflow-y': 'scroll', 'border-style': 'solid', 'border-width': '1px', 'float':'left'}),
+html.Div([
+    html.Details([
+        html.Summary('List of Laws'),
+         html.Div(id= 'provisions',children=[
+            # html.H4(id='table_name',children='Laws Connecticut 2017'),
+            generate_table(lawsInStateDF, 'Connecticut Laws 2017')
+        ],style={'height': '800px', 'width':'800px', 'display':'inlineblock', 'paddingLeft': 5, 'paddingRight': 5,'overflow-x': 'auto', 'overflow-y': 'scroll', 'border-style': 'solid', 'border-width': '1px', 'float':'top'})]),]),
 
     html.Div([
     dcc.Slider(
@@ -608,45 +617,46 @@ def update_figure(selected_year):
 
 
 
-#
-# @app.callback(Output('provisions', 'children'),
-#                 [Input('graph-with-slider','hoverData')])
-# def find_density(hoverData):
-#
-#     code = hoverData['points'][0]['location']
-#     year = hoverData['points'][0]['customdata']
-#
-#
-#
-#
-#     test = df[(df['code'] == code) & (df['year'] == year)]
-#
-#     notthis = [0,1,2,136]
-#     count = 0
-#     laws_list = []
-#     for i in range(0,133):
-#         laws_list.append(law_codes.iloc[i,3])
-#     laws_headers = test.columns.values.tolist()
-#
-#     lawsInState = []
-#
-#     for i in range(0,137):
-#         if i not in notthis:
-#             if test.iloc[0,i] == 1:
-#                 lawsInState.append(laws_headers[i])
-#     sorted(lawsInState, key=str.lower)
-#     lawsInStateDFList = []
-#
-#     for i in range(0, len(lawsInState)):
-#         test1 = law_codes[(law_codes['Category Code.3'] == lawsInState[i])]
-#         lawsInStateDFList.append(test1)
-#
-#
-#     lawsInStateDF = pd.concat(lawsInStateDFList)
-#
-#     return generate_table(lawsInStateDF)
+# Causes the table to update laws displayed
+@app.callback(Output('provisions', 'children'),
+                [Input('graph-with-slider','hoverData')])
+def find_density(hoverData):
+
+    code = hoverData['points'][0]['location']
+    year = hoverData['points'][0]['customdata']
 
 
+
+
+    test = df[(df['code'] == code) & (df['year'] == year)]
+
+    Title = code_to_state[code] + ' Laws ' + str(year)
+
+    notthis = [0,1,2,136]
+    count = 0
+    laws_list = []
+    for i in range(0,133):
+        laws_list.append(law_codes.iloc[i,3])
+    laws_headers = test.columns.values.tolist()
+
+    lawsInState = []
+
+    for i in range(0,137):
+        if i not in notthis:
+            if test.iloc[0,i] == 1:
+                lawsInState.append(laws_headers[i])
+    sorted(lawsInState, key=str.lower)
+    lawsInStateDFList = []
+
+    for i in range(0, len(lawsInState)):
+        test1 = law_codes[(law_codes['Category Code.3'] == lawsInState[i])]
+        lawsInStateDFList.append(test1)
+
+
+    lawsInStateDF = pd.concat(lawsInStateDFList)
+    lawsInStateDF.sort_values(by=['Category Code'])
+
+    return generate_table(lawsInStateDF,Title)
 
 
 # mass-shooting scatter
@@ -776,69 +786,6 @@ def backgroundScatterLasso(selected_year):
     numOfStates = len(StateCodes)
     year = selected_year
 
-    # monthVict = [0,0,0,0,0,0,0,0,0,0,0,0]
-    # monthDesc = []
-    # for i in range(1, 13):
-    #     monthDesc.append('')
-    #
-    #
-    # for i in range(0, len(years)):
-    #     if years[i] == year:
-    #         Date = date[i]
-    #         if Date[1] == '/':
-    #
-    #             if Date[0] == '1':
-    #                 monthVict[0] += int(totalVic[i])
-    #                 monthDesc[0] += (desc[i] + '<br>')
-    #
-    #             if Date[0] == '2':
-    #                 monthVict[1] += int(totalVic[i])
-    #                 monthDesc[1] += (desc[i] + '<br>')
-    #
-    #             if Date[0] == '3':
-    #                 monthVict[2] += int(totalVic[i])
-    #                 monthDesc[2] += (desc[i] + '<br>')
-    #
-    #             if Date[0] == '4':
-    #                 monthVict[3] += int(totalVic[i])
-    #                 monthDesc[3] += (desc[i] + '<br>')
-    #
-    #             if Date[0] == '5':
-    #                 monthVict[4] += int(totalVic[i])
-    #                 monthDesc[4] += (desc[i] + '<br>')
-    #
-    #             if Date[0] == '6':
-    #                 monthVict[5] += int(totalVic[i])
-    #                 monthDesc[5] += (desc[i] + '<br>')
-    #
-    #             if Date[0] == '7':
-    #                 monthVict[6] += int(totalVic[i])
-    #                 monthDesc[6] += (desc[i] + '<br>')
-    #
-    #             if Date[0] == '8':
-    #                 monthVict[6] += int(totalVic[i] )
-    #                 monthDesc[6] += (desc[i] + '<br>')
-    #
-    #             if Date[0] == '9':
-    #                 monthVict[8] += int(totalVic[i])
-    #                 monthDesc[8] += (desc[i] + '<br>')
-    #
-    #         else:
-    #
-    #             if Date[1] == '0':
-    #                 monthVict[9] += int(totalVic[i])
-    #                 monthDesc[9] += (desc[i] + '<br>')
-    #
-    #             if Date[1] == '1':
-    #                 monthVict[10] += int(totalVic[i])
-    #                 monthDesc[10] += (desc[i] + '<br>')
-    #
-    #             if Date[1] == '2':
-    #                 monthVict[11] += int(totalVic[i])
-    #                 monthDesc[11] += (desc[i] + '<br>')
-    #
-
-    # print(StateCodes)
 
     traces = []
 
