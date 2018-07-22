@@ -586,7 +586,7 @@ def update_figure(selected_year):
                 #     title="Total Laws")
             )],
         'layout': go.Layout(
-            title = 'US Firearms Provisions by State for ' '<br>' + '(Total Laws)',
+            title = 'US Firearms Provisions by State for '+ str(selected_year)  + '<br>' + '(Total Laws)',
             width = 600,
             height = 600,
             geo = dict(
