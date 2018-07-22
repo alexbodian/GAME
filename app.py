@@ -20,7 +20,7 @@ from plotly.graph_objs import *
 import json
 mapbox_access_token = 'pk.eyJ1IjoiYWxleC1ib2RpYW4iLCJhIjoiY2pmaGVwZGRzNGQ4NDJ4bzFpeWNtM3N5YyJ9.kqDjoO1nF1YuiVynmcbcDw'
 import numpy as np
-import os 
+import os
 from flask_caching import Cache
 
 
@@ -288,9 +288,14 @@ app.scripts.append_script({"external_url": my_js_url})
 app.layout = html.Div([
 
     html.Div([
-    dcc.Graph(id='graph-with-slider'),dcc.Graph(id='background-check-choropleth'),dcc.Graph(id='shootings-state-choropleth'),
+        html.Div([
+        dcc.Graph(id='graph-with-slider')],style={'width':'30%', 'height': '70%','float':'left','margin': 0, 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':35, 'overflow': 'hidden'}),
+        html.Div([
+        dcc.Graph(id='background-check-choropleth')],style={'width':'30%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':35, 'overflow': 'hidden'}),
+        html.Div([
+        dcc.Graph(id='shootings-state-choropleth')],style={'width':'30%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':35, 'overflow': 'hidden'}),
     # dcc.Dropdown(id='year-picker', options=year_options,value=df['year'].min())
-    ],style={'width':'50%', 'height': '70%','float':'left', 'paddingLeft': 15, 'display': 'inlineblock', 'paddingBottom':35}),
+    ],style={'width':'100%', 'height': '70%','float':'left', 'paddingLeft': 15, 'display': 'inlineblock', 'paddingBottom':35}),
 
 #  html.Div(id= 'provisions',children=[
 #     html.H4(children='Laws Connecticut 1991'),
@@ -439,8 +444,8 @@ def update_figure(selected_year):
         'data': trace,
         'layout': go.Layout(
             title = 'US Background Checks ' + str(selected_year),
-            width = 400,
-            height = 400,
+            width = 600,
+            height = 600,
             geo = dict(
                 scope = 'usa',
                 projection = dict (type= 'albers usa'),
@@ -519,8 +524,8 @@ def update_figure(selected_year):
         'data': trace,
         'layout': go.Layout(
             title = 'US Background Checks ' + str(selected_year),
-            width = 400,
-            height = 400,
+            width = 600,
+            height = 600,
             geo = dict(
                 scope = 'usa',
                 projection = dict (type= 'albers usa'),
@@ -579,8 +584,8 @@ def update_figure(selected_year):
             )],
         'layout': go.Layout(
             title = 'US Firearms Provisions by State for ' + str(selected_year),
-            width = 400,
-            height = 400,
+            width = 600,
+            height = 600,
             geo = dict(
                 scope = 'usa',
                 projection = dict (type= 'albers usa'),
@@ -764,7 +769,6 @@ def backgroundScatterLasso(selected_year):
 
     # location is the abbrieviation for the state
 
-
     numOfStates = len(StateCodes)
     year = selected_year
 
@@ -889,7 +893,7 @@ def backgroundScatterLasso(selected_year):
             yaxis='Total Background Checks'
             ))
 
-    
+
 
     return {
         'data': traces,
