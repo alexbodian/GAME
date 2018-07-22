@@ -434,9 +434,9 @@ def update_figure(selected_year):
                         color='rgb(255,255,255)',
                         width=2
                     )),
-                colorbar=dict(
-                    title="Total Mass Shootings")
-
+                # colorbar=dict(
+                #     title="Total Mass Shootings")
+                #
 
         )]
 
@@ -446,7 +446,7 @@ def update_figure(selected_year):
     return {
         'data': trace,
         'layout': go.Layout(
-            title = 'US Mass Shootings ' + str(selected_year),
+            title = 'US Mass Shootings ' + str(selected_year) + '<br>' + '(Total Mass Shootings)',
             width = 600,
             height = 600,
             geo = dict(
@@ -514,8 +514,8 @@ def update_figure(selected_year):
                         color='rgb(255,255,255)',
                         width=2
                     )),
-                colorbar=dict(
-                    title="Total Background Checks")
+                # colorbar=dict(
+                #     title="Total Background Checks")
 
 
         )]
@@ -526,7 +526,7 @@ def update_figure(selected_year):
     return {
         'data': trace,
         'layout': go.Layout(
-            title = 'US Background Checks ' + str(selected_year),
+            title = 'US Background Checks ' + str(selected_year) + '<br>' + '(Total Background Checks)',
             width = 600,
             height = 600,
             geo = dict(
@@ -582,11 +582,11 @@ def update_figure(selected_year):
                         color='rgb(255,255,255)',
                         width=2
                     )),
-                colorbar=dict(
-                    title="Total Laws")
+                # colorbar=dict(
+                #     title="Total Laws")
             )],
         'layout': go.Layout(
-            title = 'US Firearms Provisions by State for ' + str(selected_year),
+            title = 'US Firearms Provisions by State for ' '<br>' + '(Total Laws)',
             width = 600,
             height = 600,
             geo = dict(
