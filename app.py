@@ -286,7 +286,7 @@ app.css.append_css({'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
 # Append an externally hosted JS bundle
 my_js_url = 'https://unkpg.com/some-npm-package.js'
 app.scripts.append_script({"external_url": my_js_url})
-
+server = app.server
 app.layout = html.Div([
 
     html.Div([
@@ -978,4 +978,4 @@ def update_locations(selected_years):
 
 
 if __name__ == '__main__':
-	app.run_server(debug=True)
+	app.run_server()
