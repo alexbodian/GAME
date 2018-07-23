@@ -33,7 +33,7 @@ def generate_table(dataframe,title):
 
     return html.Table(
         # Header
-        [html.Tr(html.H3(title))] +
+        [html.Tr(html.H5(title))] +
 
         # Header
         [html.Tr([html.Th(col) for col in dataframe.columns])] +
@@ -220,7 +220,7 @@ StateCodes = list(code_to_state.keys())
 df = pd.read_csv('laws.csv')
 temp_codes = pd.read_excel('codebook.xlsx')
 
-law_codes = temp_codes.loc[:,'Category Code':'Category Code.4']
+law_codes = temp_codes.loc[:,'Category Code.1':'Category Code.4']
 
 
 
@@ -298,20 +298,23 @@ server = app.server
 app.layout = html.Div([
 
     html.Div([
-        html.Div([
-        dcc.Graph(id='graph-with-slider')],style={'width':'30%', 'height': '70%','float':'left','margin': 0, 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':15, 'overflow': 'hidden'}),
-        html.Div([
-        dcc.Graph(id='background-check-choropleth')],style={'width':'30%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':15, 'overflow': 'hidden'}),
-        html.Div([
-        dcc.Graph(id='shootings-state-choropleth')],style={'width':'30%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':15, 'overflow': 'hidden'}),
-    ],style={'width':'100%', 'height': '70%','float':'left', 'paddingLeft': 15, 'display': 'inlineblock', 'paddingBottom':15}),
+
 html.Div([
     html.Details([
         html.Summary('List of Laws'),
          html.Div(id= 'provisions',children=[
             # html.H4(id='table_name',children='Laws Connecticut 2017'),
             generate_table(lawsInStateDF, 'Connecticut Laws 2017')
-        ],style={'height': '800px', 'width':'800px', 'display':'inlineblock', 'paddingLeft': 5, 'paddingRight': 5,'overflow-x': 'auto', 'overflow-y': 'scroll', 'border-style': 'solid', 'border-width': '1px', 'float':'top'})]),]),
+        ],style={'height': '600px', 'width':'600px', 'display':'inlineblock', 'paddingLeft': 5, 'paddingRight': 5, 'paddingBottom': 1,'overflow-x': 'auto', 'overflow-y': 'scroll', 'border-style': 'solid', 'border-width': '1px', 'float':'left'})]),]),
+
+
+        html.Div([
+        dcc.Graph(id='graph-with-slider')],style={'width':'30%', 'height': '70%','float':'left','margin': 0, 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':1, 'overflow': 'hidden'}),
+        html.Div([
+        dcc.Graph(id='background-check-choropleth')],style={'width':'30%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':1, 'overflow': 'hidden'}),
+        html.Div([
+        dcc.Graph(id='shootings-state-choropleth')],style={'width':'40%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':1, 'overflow': 'hidden'}),
+    ],style={'width':'100%', 'height': '60%','float':'left', 'paddingLeft': 10, 'display': 'inlineblock', 'paddingBottom':5}),
 
     html.Div([
     dcc.Slider(
@@ -320,7 +323,7 @@ html.Div([
     max = df['year'].max(),
     marks = range_dict,
     value = df['year'].max(),
-    ),],style={'width':'60%', 'height': '70%','float':'left', 'paddingLeft': 15, 'display': 'block', 'paddingBottom':35}),
+    ),],style={'width':'90%', 'height': '65%','float':'left', 'paddingLeft': 55, 'display': 'block', 'paddingBottom':10}),
 
 
 
@@ -343,7 +346,7 @@ html.Div([
                                             xaxis= {'title': 'Month'})}
                     ),
 
-],style={'width': '80%', 'height':'90%', 'display':'inline-block', 'paddingTop': '35'}),
+],style={'width': '50%', 'height':'50%', 'display':'inline-block', 'paddingTop': '8'}),
 
     html.Div([dcc.Graph(id='mass-shooting-scatter',animate='false',
                     figure = {'data': [
@@ -362,7 +365,7 @@ html.Div([
                                             xaxis= {'title': 'Month'})}
                     ),
 
-],style={'width': '80%', 'height':'90%', 'display':'inline-block', 'paddingTop': '35'}),
+],style={'width': '50%', 'height':'50%', 'display':'inline-block', 'paddingTop': '8'}),
 
 
 
@@ -384,7 +387,7 @@ html.Div([
 
     html.Div(html.Pre(id='hover-data', style = {'paddingTop': 35}),
     style={'width':'30%'}),
-            ])
+            ],style={'height':'70%'})
 
 
 
@@ -654,7 +657,11 @@ def find_density(hoverData):
 
 
     lawsInStateDF = pd.concat(lawsInStateDFList)
-    lawsInStateDF.sort_values(by=['Category Code'])
+
+    lawsInStateDF = lawsInStateDF.rename(index=str, columns={"Category Code.1": "Category", "Category Code.2": "Type", "Category Code.3": "Abbrieviation", "Category Code.4": "Description" })
+
+
+
 
     return generate_table(lawsInStateDF,Title)
 
