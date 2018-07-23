@@ -247,7 +247,7 @@ scl = [[0.0, 'rgb(246,239,247)'],[0.2, 'rgb(208,209,230)'],[0.4, 'rgb(166,189,21
 #  [0.4, 'rgb(254,144,106)'],[0.5, 'rgb(244,116,97)'],[0.6, 'rgb(231,87,88)'],\
 #  [0.7, 'rgb(213,60,76)'],[0.8, 'rgb(192,34,59)'],[0.9, 'rgb(167,11,36)'],[1.0, 'rgb(139,0,0)']]
 
-test = df[(df['code'] == 'CT') & (df['year'] == 1991)]
+test = df[(df['code'] == 'CT') & (df['year'] == 2017)]
 
 notthis = [0,1,2,136]
 count = 0
@@ -271,6 +271,10 @@ for i in range(0, len(lawsInState)):
 
 
 lawsInStateDF = pd.concat(lawsInStateDFList)
+
+lawsInStateDFCT = lawsInStateDF
+
+lawsInStateDFCT = lawsInStateDFCT.rename(index=str, columns={"Category Code.1": "Category", "Category Code.2": "Type", "Category Code.3": "Abbrieviation", "Category Code.4": "Description" })
 
 
 
@@ -301,10 +305,10 @@ app.layout = html.Div([
 
 html.Div([
     html.Details([
-        html.Summary('List of Laws'),
+        html.Summary('(Click here to see all the laws for a state)'),
          html.Div(id= 'provisions',children=[
             # html.H4(id='table_name',children='Laws Connecticut 2017'),
-            generate_table(lawsInStateDF, 'Connecticut Laws 2017')
+            generate_table(lawsInStateDFCT, 'Connecticut Laws 2017')
         ],style={'height': '600px', 'width':'600px', 'display':'inlineblock', 'paddingLeft': 5, 'paddingRight': 5, 'paddingBottom': 1,'overflow-x': 'auto', 'overflow-y': 'scroll', 'border-style': 'solid', 'border-width': '1px', 'float':'left'})]),]),
 
 
