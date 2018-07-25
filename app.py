@@ -149,7 +149,16 @@ lonKaggle=[]
 
 for i in range(0, df_shooting.shape[0]):
     loc.append(df_shooting.loc[i, 'location'])
-    date.append(df_shooting.loc[i, 'date'])
+    ddmmyyyy=df_shooting.loc[i, 'date'].split("/")
+    tempdate=""
+    if (len(ddmmyyyy[2])<3):
+        ddmmyyyy[2]="20"+ddmmyyyy[2]
+    for j in range(0,len(ddmmyyyy)):
+        tempdate=tempdate+ddmmyyyy[j]
+        if (j<2):
+            tempdate=tempdate+"/"
+    date.append(tempdate)
+
     totalVic.append(str(df_shooting.loc[i, 'total_victims']))
 
     text = df_shooting.loc[i, 'case'] + '<br>'  \
@@ -772,7 +781,7 @@ def massShootingScatter(selected_year):
 
             title= str(year) + ' Mass Shootings',
             xaxis= {'title': 'Month'},
-            yaxis = dict(range= [0,maxVict],autorange= True, title='Total Victims') ,
+            yaxis = dict(range= [0,maxVict+5],autorange= True, title='Total Victims') ,
             hovermode='closet',
             legend=dict(orientation="v")
 
