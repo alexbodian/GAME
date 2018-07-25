@@ -772,7 +772,7 @@ def massShootingScatter(selected_year):
 
             title= str(year) + ' Mass Shootings',
             xaxis= {'title': 'Month'},
-            yaxis = dict(range= [0,maxVict + 1000],autorange= True, title='Total Victims') ,
+            yaxis = dict(range= [0,maxVict],autorange= True, title='Total Victims') ,
             hovermode='closet',
             legend=dict(orientation="v")
 
