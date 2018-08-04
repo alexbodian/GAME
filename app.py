@@ -27,7 +27,9 @@ from flask_caching import Cache
 
 
 
-
+# function that generates the table that
+# is used for the collapsable div 
+# for displaying state laws
 def generate_table(dataframe,title):
     max_rows = 40
 
@@ -46,9 +48,6 @@ def generate_table(dataframe,title):
 
 
 state_to_code = {
-    # # Other
-    # 'District of Columbia': 'DC',
-
     # States
     'Alabama': 'AL',
     'Alaska': 'AK',
@@ -101,32 +100,16 @@ state_to_code = {
     'Wisconsin': 'WI',
     'Wyoming': 'WY',
 }
+code_to_state = {v: k for k, v in state_to_code.items()}
+StateCodes = list(code_to_state.keys())
 
 monthes = ['January', 'February', 'March', 'April','May', 'June', 'July', 'August','September','October','November','December']
 
-
 db = pd.read_csv('nics-firearm-background-checks.csv')
-
-# year_month = []
-
-# month_list = ['-01','-02', '-03', '-04', '-05', '-06', '-07', \
-#                '-08','-09','-10','-11','-12' ]
-
-# year = '2004'
-# for i in month_list:
-#     curr = year + i
-#     year_month.append(curr)
-#     # print(curr)
-
-# dx = df[(df.month.isin(year_month)) & (df.state == 'Connecticut')]
-
-# # reverse df
-# dx = dx.iloc[::-1]
-
 df_shooting = pd.read_csv('https://docs.google.com/spreadsheets/d/1b9o6uDO18sLxBqPwl_Gh9bnhW-ev_dABH83M5Vb5L8o/export?format=csv&gid=0')
 dfKaggle = pd.read_csv('Mass Shootings Dataset Ver 2.csv',encoding='latin1')
 
-# print(df_shooting['case'])
+
 
 # list of lists
 # 0            1         2          3        4     5
@@ -219,9 +202,7 @@ shooting_monthes = []
 
 
 
-code_to_state = {v: k for k, v in state_to_code.items()}
 
-StateCodes = list(code_to_state.keys())
 
 
 
@@ -245,16 +226,14 @@ for year in df['year'].unique():
     year_options.append({'label':str(year),'value':year})
     range_dict[str(year)] = year
 
-# year_dict =
 
 
+# this is the colorscale that is used in the choropleths
 scl = [[0.0, 'rgb(246,239,247)'],[0.2, 'rgb(208,209,230)'],[0.4, 'rgb(166,189,219)'],\
             [0.6, 'rgb(103,169,207)'],[0.8, 'rgb(28,144,153)'],[1.0, 'rgb(1,108,89)']]
 
 
-# scl = [[0.0, 'rgb(255,255,224)'],[0.1, 'rgb(255,230,178)'],[0.2, 'rgb(255,203,145)'],[0.3, 'rgb(255,174,121)'],\
-#  [0.4, 'rgb(254,144,106)'],[0.5, 'rgb(244,116,97)'],[0.6, 'rgb(231,87,88)'],\
-#  [0.7, 'rgb(213,60,76)'],[0.8, 'rgb(192,34,59)'],[0.9, 'rgb(167,11,36)'],[1.0, 'rgb(139,0,0)']]
+
 
 test = df[(df['code'] == 'CT') & (df['year'] == 2017)]
 
@@ -278,11 +257,9 @@ for i in range(0, len(lawsInState)):
     test1 = law_codes[(law_codes['Category Code.3'] == lawsInState[i])]
     lawsInStateDFList.append(test1)
 
-
+# this renames the headers for the state laws table
 lawsInStateDF = pd.concat(lawsInStateDFList)
-
 lawsInStateDFCT = lawsInStateDF
-
 lawsInStateDFCT = lawsInStateDFCT.rename(index=str, columns={"Category Code.1": "Category", "Category Code.2": "Type", "Category Code.3": "Abbrieviation", "Category Code.4": "Description" })
 
 
@@ -290,19 +267,6 @@ lawsInStateDFCT = lawsInStateDFCT.rename(index=str, columns={"Category Code.1": 
 
 app = dash.Dash(__name__)
 
-# cache = Cache(app.server, config={
-#     # try 'filesystem' if you don't want to setup redis
-#     'CACHE_TYPE': 'redis',
-#     'CACHE_REDIS_URL': os.environ.get('REDIS_URL', '')
-# })
-# app.config.suppress_callback_exceptions = True
-
-# timeout = 10
-# https://goo.gl/f75Ufn
-# chrolopleth info
-# Append an externally hosted CSS stylesheet
-#my_css_url = "https://unpkg.com/normalize.css@5.0.0"
-#app.css.append_css({"external_url": my_css_url})
 app.css.append_css({'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'})
 # Append an externally hosted JS bundle
 my_js_url = 'https://unkpg.com/some-npm-package.js'
@@ -313,23 +277,27 @@ app.layout = html.Div([
     html.Div([
 
 html.Div([
+    # this is the collapsable table for displaying specific state laws
     html.Details([
         html.Summary('(Click here to see all the laws for a state)'),
          html.Div(id= 'provisions',children=[
-            # html.H4(id='table_name',children='Laws Connecticut 2017'),
             generate_table(lawsInStateDFCT, 'Connecticut Laws 2017')
         ],style={'height': '600px', 'width':'600px', 'display':'inlineblock', 'paddingLeft': 5, 'paddingRight': 5, 'paddingBottom': 1,'overflow-x': 'auto', 'overflow-y': 'scroll', 'border-style': 'solid', 'border-width': '1px', 'float':'left'})]),]),
 
 
         html.Div([
+        # state laws choropleth
         dcc.Graph(id='graph-with-slider')],style={'width':'30%', 'height': '70%','float':'left','margin': 0, 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':1, 'overflow': 'hidden'}),
         html.Div([
+        # total background checks per year choropleth by state
         dcc.Graph(id='background-check-choropleth')],style={'width':'30%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':1, 'overflow': 'hidden'}),
         html.Div([
+        # mass shootings choropleth
         dcc.Graph(id='shootings-state-choropleth')],style={'width':'40%', 'height': '70%','float':'left', 'paddingLeft': 0, 'display': 'inlineblock', 'paddingBottom':1, 'overflow': 'hidden'}),
     ],style={'width':'100%', 'height': '60%','float':'left', 'paddingLeft': 10, 'display': 'inlineblock', 'paddingBottom':5}),
 
     html.Div([
+    # main year slider that affects the year for the chorpleths and scatter plots
     dcc.Slider(
     id='year-picker',
     min = df['year'].min(),
@@ -341,7 +309,7 @@ html.Div([
 
 
 
-
+    # background checks by month state scatter plot
     html.Div([dcc.Graph(id='background-scatter-lasso',animate='false',
                     figure = {'data': [
                         go.Scatter(
@@ -360,7 +328,7 @@ html.Div([
                     ),
 
 ],style={'width': '50%', 'height':'50%', 'display':'inline-block', 'paddingTop': '8'}),
-
+    # total mass shootings by month scatter plot
     html.Div([dcc.Graph(id='mass-shooting-scatter',animate='false',
                     figure = {'data': [
                         go.Scatter(
@@ -383,9 +351,11 @@ html.Div([
 
 
     html.Div([
-
+    # mapbox element that displays coordinates for mass shootings 
     dcc.Graph(id='shooting_locations',style={'paddingBottom':0}),
 
+    # rangeslider that affects the years for mass shootings that are displayed
+    # on the map
     dcc.RangeSlider(
         id='shooting_range',
         min=1982,
@@ -397,9 +367,7 @@ html.Div([
 
     ],style={'width':'80%', 'paddingLeft': 35, 'paddingBottom': 50}),
 
-
-    html.Div(html.Pre(id='hover-data', style = {'paddingTop': 35}),
-    style={'width':'30%'}),
+   
             ],style={'height':'70%'})
 
 
@@ -589,8 +557,7 @@ def update_figure(selected_year):
         year_list.append(selected_year)
 
     filtered_df['text'] = filtered_df['state']
-    # + '<br>' +\
-    # 'age18longgunpossess ' + filtered_df['age18longgunpossess']+ ' age18longgunsale '+ filtered_df['age18longgunsale']
+   
 
 
     return {
@@ -816,16 +783,7 @@ def backgroundScatterLasso(selected_year):
         curr = str(year) + i
         year_month.append(curr)
 
-    # traces.append(go.Scatter(
-    #     x=monthes,
-    #     y=monthVict,
-    #     text= monthDesc,
-    #     mode='markers',
-    #     opacity=0.7,
-    #     marker={'size': 15},
-    #     name= 'Shootings',
-    #     yaxis='Victims of mass shootings'
-    #     ))
+
 
 
     if year < 1999:
@@ -884,11 +842,6 @@ def backgroundScatterLasso(selected_year):
 def update_locations(selected_years):
     # selected_years is a list
 
-
-    # desc = []
-    # lat = []
-    # lon = []
-    # year = []
 
     desc_temp = []
     lat_temp = []
