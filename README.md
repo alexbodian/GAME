@@ -1,7 +1,7 @@
 # Firearm-activity
 # Documentation:
 * Developer facing documention in "DevDoc.txt"
-* User facing documention in "UserDoc.txt.docx"
+* User facing documention in "UserDoc.txt.docx" and can be accessed at "https://drive.google.com/open?id=1z3idVZF4jsTaSJ3Kj0FtgHHZjjzrNilGvDH3Y7ixMvk"
 ## Scripts:
 * The only Main Scripts ran in this program are in "app.py"
 ## Databases provided files:
